@@ -1,112 +1,241 @@
-// ==============================================================================
-// #Typography
-// ==============================================================================
+/*============================================================================
+  #Typography
+==============================================================================*/
 body,
 input,
 textarea,
 button,
 select {
-	font-size: 87.5%; // Henseforth known as 1em (assumed at 14px)
-	line-height: 1.6;
-	font-family: $bodyFontStack;
-	color: $colorText;
-	font-weight: 300;
-	-webkit-font-smoothing: antialiased;
-	-webkit-text-size-adjust: 100%;
+  font-size: $baseFontSize;
+  line-height: 1.6;
+  font-family: $bodyFontStack;
+  color: $colorTextBody;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
 }
 
-h1, h2, h3, h4, h5, h6,
-.h1, .h2, .h3, .h4, .h5, .h6 {
-	display: block;
-	font-family: $headerFontStack;
-	font-weight: normal;
-	margin-bottom: 0.5em;
-	line-height: 1.4;
+h1, h2, h3, h4, h5, h6 {
+  font-family: $headerFontStack;
+  font-weight: $headerFontWeight;
+  margin: 0 0 0.5em;
+  line-height: 1.4;
 
-	a {
-		text-decoration: none;
-
-		&:hover {
-			text-decoration: underline;
-		}
-	}
-
-	// Add some top margin to headers from the rich text editor
-	.rte & {
-		margin-top: 0.2em;
-	}
+  a {
+    text-decoration: none;
+    font-weight: inherit;
+  }
 }
-h1 a, h2 a, h3 a, h4 a, h5 a, h6 a,
-.h1 a, .h2 a, .h3 a, .h4 a, .h5 a, .h6 a { font-weight: inherit; }
 
-// Pixel to EM conversion tool http://pxtoem.com/
-h1, .h1 { font-size: 3em; }       // 42px
-h2, .h2 { font-size: 2.429em; }   // 34px
-h3, .h3 { font-size: 2em; }       // 28px
-h4, .h4 { font-size: 1.429em; }   // 20px
-h5, .h5 { font-size: 1.143em; }   // 16px
-h6, .h6 { font-size: 1em; }       // 14px
+/*================ Use em() Sass function to declare font-size ================*/
+h1 {
+  font-size: em(36px);
+}
 
-p { margin: 0 0 0.75em 0; }
-p img { margin: 0; }
+h2 {
+  font-size: em(28px);
+}
 
-em { font-style: italic; }
-strong { font-weight: bold; }
-small { font-size: 80%; }
+h3 {
+  font-size: em(22px);
+}
+
+h4 {
+  font-size: em(20px);
+}
+
+h5 {
+  font-size: em(16px);
+}
+
+h6 {
+  font-size: em(14px);
+}
+
+
+.h1 { @extend h1; }
+.h2 { @extend h2; }
+.h3 { @extend h3; }
+.h4 { @extend h4; }
+.h5 { @extend h5; }
+.h6 { @extend h6; }
+
+p {
+  margin: 0 0 ($gutter / 2) 0;
+
+  img {
+    margin: 0;
+  }
+}
+
+em {
+  font-style: italic;
+}
+
+b, strong {
+  font-weight: bold;
+}
+
+small {
+  font-size: 0.9em;
+}
+
+sup, sub {
+  position: relative;
+  font-size: 60%;
+  vertical-align: baseline;
+}
 sup {
-	position: relative;
-	top: -0.5em;
-	font-size: 60%;
+  top: -0.5em;
 }
 
-.text-light { color: $colorTextGrey; }
+sub {
+  bottom: -0.5em;
+}
 
-// Blockquotes
+/*================ Blockquotes ================*/
 blockquote {
-	font-size: 1.125em;
-	line-height: 1.45;
-	color: $colorTextGrey;
-	font-style: italic;
-	margin: 0 0 $gutter;
-	padding: $gutter/2 $gutter;
-	border-left: 1px solid $borderColor;
+  font-size: 1.125em;
+  line-height: 1.45;
+  font-style: italic;
+  margin: 0 0 $gutter;
+  padding: ($gutter / 2) $gutter;
+  border-left: 1px solid $colorBorder;
 
-	p {
-		margin-bottom: 0;
+  p {
+    margin-bottom: 0;
 
-		& + cite {
-			margin-top: $gutter/2;
-		}
-	}
+    & + cite {
+      margin-top: $gutter / 2;
+    }
+  }
 
-	cite {
-		display: block;
-		font-size: 0.75em;
-		color: $colorTextGrey;
+  cite {
+    display: block;
+    font-size: 0.75em;
 
-		&:before {
-			content: "\2014 \0020";
-		}
-	}
+    &:before {
+      content: '\2014 \0020';
+    }
+  }
 }
 
+/*================ Code ================*/
+code, pre {
+  background-color: #faf7f5;
+  font-family: Consolas,monospace;
+  font-size: 1em;
+  border: 0 none;
+  padding: 0 2px;
+  color: #51ab62;
+}
+
+pre {
+  overflow: auto;
+  padding: $gutter / 2;
+  margin: 0 0 $gutter;
+}
+
+/*================ Horizontal Rules ================*/
 hr {
-	clear: both;
-	border-top: solid $borderColor;
-	border-width: 1px 0 0;
-	margin: $gutter*2 0;
+  clear: both;
+  border-top: solid $colorBorder;
+  border-width: 1px 0 0;
+  margin: $gutter 0;
+  height: 0;
 
-	&.hr-small {
-		margin: $gutter 0;
-	}
+  &.hr--small {
+    margin: ($gutter / 2) 0;
+  }
 
-	&.hr-clear {
-		border-top: 0 none;
-	}
+  &.hr--clear {
+    border-top-color: transparent;
+  }
 }
 
-.page-header {
-	@extend .clearfix;
-	border-bottom: 1px solid $borderColor;
-	margin-bottom: $gutter;
+/*================ Section Headers ================*/
+.section-header {
+  margin-bottom: $gutter / 1.5;
+}
+
+@include at-query ($min, $large) {
+  .section-header {
+    display: table;
+    width: 100%;
+  }
+
+  .section-header__title {
+    margin-bottom: $gutter / 2.5;
+  }
+
+  .section-header__left {
+    display: table-cell;
+    vertical-align: middle;
+    margin-bottom: 0;
+
+    h1, h2, h3, h4,
+    .h1, .h2, .h3, .h4 {
+      margin-bottom: 0;
+    }
+  }
+
+  .section-header__right {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: right;
+    width: 335px;
+
+    @include at-query ($max, $medium) {
+      margin-bottom: $gutter;
+    }
+  }
+}
+
+.section-header__right {
+  .form-horizontal,
+  .collection-view {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  @include at-query ($min, $postSmall) {
+    label + select,
+    .collection-view {
+      margin-left: $gutter / 2;
+    }
+  }
+}
+
+.collection-view {
+  display: inline-block;
+  border: 1px solid $colorBorder;
+  border-radius: $radius;
+  padding: 0 5px;
+  height: 37px; // same as form elements
+  overflow: hidden;
+
+  /*================ Only show on larger screens ================*/
+  @include at-query ($min, $large) {
+    display: inline-block;
+  }
+}
+
+.change-view {
+  display: block;
+  background: none;
+  border: 0 none;
+  float: left;
+  padding: 10px 8px;
+  color: $colorBorder;
+  line-height: 1;
+
+  &:hover,
+  &:focus {
+    color: $colorPrimary;
+  }
+}
+
+.change-view--active {
+  cursor: default;
+  color: $colorPrimary;
 }

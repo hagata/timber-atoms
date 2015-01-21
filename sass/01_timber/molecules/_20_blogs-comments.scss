@@ -1,24 +1,12 @@
-// ==============================================================================
-// #Blogs and Comments
-// ==============================================================================
-.template-article {
-	.article-header {
-		margin-bottom: 0;
+/*============================================================================
+  #Blogs and Comments
+==============================================================================*/
+.comment {
+  margin-bottom: $gutter;
 
-		& + .text-light {
-			display: block;
-			margin-bottom: $gutter;
-		}
-	}
+  & + & {
+    border-top: 1px solid $colorBorder;
+    padding-top: $gutter;
+  }
 }
 
-// Comments
-.comment-content {
-	margin-bottom: -$gutter/2;
-}
-
-.comment-author {
-	font-size: 14px;
-	font-style: italic;
-	margin-bottom: $gutter;
-}

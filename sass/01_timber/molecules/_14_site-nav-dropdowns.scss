@@ -1,90 +1,98 @@
-// ==============================================================================
-// #Site Nav and Dropdowns
-// ==============================================================================
+/*============================================================================
+  #Site Nav and Dropdowns
+==============================================================================*/
 .nav-bar {
-	background-color: $colorNav;
-}
+  background-color: $colorNav;
 
-.nav-bar ul {
-	margin: 0;
+  ul {
+    margin: 0;
+  }
+
+  li {
+    margin: 0;
+  }
 }
 
 .site-nav {
-	font-size: 1.2em;
+  font-size: em(16px);
+  cursor: default;
 
-	li {
-		margin: 0;
-		display: block;
-	}
+  li {
+    margin: 0;
+    display: block;
+  }
 
-	& > li {
-		position: relative;
-		display: inline-block;
+  > li {
+    position: relative;
+    display: inline-block;
 
-		&:first-child a {
-			padding-left: 0;
-		}
-	}
+    &:first-child a {
+      padding-left: 0;
+    }
+  }
 
-	a {
-		display: block;
-		text-decoration: none;
-		padding: $gutter/2;
-		white-space: nowrap;
-	}
-
-	@include at-query($max, $medium) {
-		margin: 0 auto;
-		text-align: center;
-	}
+  @include at-query ($max, $medium) {
+    margin: 0 auto;
+    text-align: center;
+  }
 }
 
-.site-nav-active {
-	font-weight: bold;
+.site-nav__link {
+  display: block;
+  text-decoration: none;
+  padding: $gutter / 2;
+  white-space: nowrap;
+  color: $colorNavText;
+
+  &:hover,
+  &:active,
+  &:focus {
+    color: darken($colorNavText, 15%);
+  }
+
+  .site-nav--active > & {
+    font-weight: bold;
+  }
 }
 
-// Dropdowns
-.site-nav-dropdown {
-	display: none;
-	position: absolute;
-	left: 0;
-	z-index: 5;
+/*================ Dropdowns ================*/
+.site-nav__dropdown {
+  display: none;
+  position: absolute;
+  left: 0;
+  z-index: 5;
 
-	.site-nav li:hover & {
-		display: block;
-	}
+  .supports-no-touch .site-nav--has-dropdown:hover &,
+  .site-nav--has-dropdown.nav-hover &,
+  .nav-focus + & {
+    display: block;
+  }
 
-	a {
-		background-color: $colorNav;
+  a {
+    background-color: $colorNav;
 
-		&:hover,
-		&:active {
-			background-color: darken($colorNav, 10%);
-		}
-	}
+    &:hover,
+    &:active,
+    &:focus {
+      background-color: darken($colorNav, 10%);
+    }
+  }
 }
 
-// Search bar in header
+/*================ Search bar in header ================*/
 .nav-search {
-	position: relative;
-	padding: 7px 0;
+  position: relative;
+  padding: 7px 0;
 
-	@include at-query($max, $medium) {
-		padding: 0 0 $gutter/2;
-		margin: 0 auto;
-		text-align: center;
-	}
+  @include at-query ($max, $medium) {
+    padding: 0 0 ($gutter / 2);
+    margin: 0 auto;
+    text-align: center;
+  }
 
-	.input-group,
-	.input-group-field {
-		margin-bottom: 0;
-	}
+  .input-group,
+  .input-group-field {
+    margin-bottom: 0;
+  }
 }
 
-.search-bar {
-	max-width: 100%;
-
-	@include at-query($max, $medium) {
-		margin: 0 auto;
-	}
-}

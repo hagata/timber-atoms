@@ -1,27 +1,13 @@
-// ==============================================================================
-// #Site Footer
-// ==============================================================================
+/*============================================================================
+  #Site Footer
+==============================================================================*/
 .site-footer {
-	background-color: $colorFooterBg;
-	border-top: 1px solid $borderColor;
-	text-align: center;
-	padding: $gutter 0;
+  background-color: $colorFooterBg;
+  border-top: 1px solid $colorBorder;
+  padding: $gutter 0;
+  color: $colorFooterText;
 
-	@include at-query($min, $large) {
-		padding: $gutter*2 0;
-		text-align: left;
-	}
-}
-
-// Credit card icon widths (SVG)
-.payment-icons {
-	li {
-		width: 48px;
-		margin: 0 $gutter/4;
-	}
-}
-
-// We use SVG images for the credit card icons, and SVG is not supported in IE8.
-.lt-ie9 .payment-icons {
-	display: none;
+  @include at-query ($min, $large) {
+    padding: ($gutter * 2) 0;
+  }
 }

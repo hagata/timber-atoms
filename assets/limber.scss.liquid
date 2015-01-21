@@ -1,0 +1,4749 @@
+/*============================================================================
+  Shopify Timber v2.0.1
+  Copyright 2014 Shopify Inc.
+  Author Carson Shold @cshold
+  Built with Sass - http://sass-lang.com/
+
+  Some things to know about this file:
+    - Sass is compiled on Shopify's server so you don't need to convert it to CSS yourself
+    - The output CSS is compressed and comments are removed
+    - You cannot use @imports in this file
+        * Use grunt or gulp tasks to enable @imports - https://github.com/Shopify/shopify-css-import
+    - Helpers variables, mixins, and starter classes are provided. Change as needed.
+    - The file is prepped with a CSS reset
+==============================================================================*/
+
+/*============================================================================
+  Table of Contents
+
+  #Breakpoint and Grid Variables
+  #General Variables
+  #Sass Mixins
+  #Normalize
+  #Grid Setup
+  #Basic Styles
+  #Helper Classes
+  #Typography
+  #Rich Text Editor
+  #Links and Buttons
+  #Lists
+  #Tables
+  #OOCSS Media Object
+  #Images and Iframes
+  #Forms
+  #Icons
+  #Pagination
+  #Site Header
+  #Site Nav and Dropdowns
+  #Site Footer
+  #Product and Collection Grids
+  #Collection Filters
+  #Breadcrumbs
+  #Product Page
+  #Blogs and Comments
+  #Notes and Form Feedback
+  #Cart Page
+==============================================================================*/
+
+/*============================================================================
+  #Breakpoint and Grid Variables
+==============================================================================*/
+$viewportIncrement: 1px;
+
+$small: 480px;
+$medium: 768px;
+$large: 769px;
+
+$postSmall: $small + $viewportIncrement;
+$preMedium: $medium - $viewportIncrement;
+$preLarge: $large - $viewportIncrement;
+
+/*================ The following are dependencies of csswizardry grid ================*/
+$breakpoints: (
+  'small' '(max-width: #{$small})',
+  'medium' '(min-width: #{$postSmall}) and (max-width: #{$medium})',
+  'medium-down' '(max-width: #{$medium})',
+  'large' '(min-width: #{$large})'
+);
+$breakpoint-has-widths: ('small', 'medium', 'medium-down', 'large');
+$breakpoint-has-push:  ('medium', 'medium-down', 'large');
+$breakpoint-has-pull:  ('medium', 'medium-down', 'large');
+
+/*============================================================================
+  #General Variables
+==============================================================================*/
+
+// Timber Colors
+$colorPrimary: {{ settings.color_primary }};
+$colorSecondary: {{ settings.color_secondary }};
+
+// Button colors
+$colorBtnPrimary: $colorPrimary;
+$colorBtnPrimaryHover: darken($colorBtnPrimary, 10%);
+$colorBtnPrimaryActive: darken($colorBtnPrimaryHover, 10%);
+$colorBtnPrimaryText: #fff;
+
+$colorBtnSecondary: $colorSecondary;
+$colorBtnSecondaryHover: darken($colorBtnSecondary, 10%);
+$colorBtnSecondaryActive: darken($colorBtnSecondaryHover, 10%);
+$colorBtnSecondaryText: #fff;
+
+// Text link colors
+$colorLink: $colorPrimary;
+$colorLinkHover: lighten($colorPrimary, 15%);
+
+// Text colors
+$colorTextBody: {{ settings.color_body_text }};
+
+// Backgrounds
+$colorBody: {{ settings.color_body_bg }};
+
+// Border colors
+$colorBorder: {{ settings.color_borders }};
+
+// Nav and dropdown link background
+$colorNav: #f2f2f2;
+$colorNavText: #333;
+
+// Site Footer
+$colorFooterBg: {{ settings.color_footer_bg }};
+$colorFooterText: {{ settings.color_footer_text }};
+
+// Helper colors
+$disabledGrey: #f6f6f6;
+$disabledBorder: darken($disabledGrey, 25%);
+$errorRed: #d02e2e;
+$errorRedBg: #fff6f6;
+$successGreen: #56ad6a;
+$successGreenBg: #ecfef0;
+
+// Sizing variables
+$siteWidth: 1180px;
+$gutter: 30px;
+$gridGutter: 30px; // can be a %, but nested grids will have smaller margins because of it
+$radius: 3px;
+
+/*================ Typography ================*/
+
+$headerFontStack: 'HelveticaNeue', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+$headerFontWeight: 700;
+
+$bodyFontStack: 'HelveticaNeue', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+$baseFontSize: 14px; // Henseforth known as 1em
+
+@font-face {
+  font-family: 'icons';
+  src: url('{{ "icons.eot" | asset_url }}');
+  src: url('{{ "icons.eot" | asset_url }}#iefix') format("embedded-opentype"),
+       url('{{ "icons.woff" | asset_url }}') format("woff"),
+       url('{{ "icons.ttf" | asset_url }}') format("truetype"),
+       url('{{ "icons.svg" | asset_url }}#timber-icons') format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+$socialIconFontStack: 'icons';
+/*============================================================================
+  #Sass Mixins
+==============================================================================*/
+.clearfix {
+  &:after {
+    content: '';
+    display: table;
+    clear: both; }
+  *zoom: 1;
+}
+
+@mixin clearfix() {
+  &:after {
+    content: '';
+    display: table;
+    clear: both; }
+  *zoom: 1;
+}
+
+@mixin prefix($property, $value) {
+  -webkit-#{$property}: #{$value};
+  -moz-#{$property}: #{$value};
+  -ms-#{$property}: #{$value};
+  -o-#{$property}: #{$value};
+  #{$property}: #{$value};
+}
+
+@mixin transition($transition: 0.1s all) {
+  @include prefix('transition', #{$transition});
+}
+
+@mixin gradient($from, $to, $fallback) {
+  background: $fallback;
+  background: -moz-linear-gradient(top, $from 0%, $to 100%);
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,$from), color-stop(100%,$to));
+  background: -webkit-linear-gradient(top, $from 0%, $to 100%);
+  background: -o-linear-gradient(top, $from 0%, $to 100%);
+  background: -ms-linear-gradient(top, $from 0%, $to 100%);
+  background: linear-gradient(top bottom, $from 0%, $to 100%);
+}
+
+@mixin backface($visibility: hidden) {
+  @include prefix('backface-visibility', #{$visibility});
+}
+
+@mixin box-sizing($box-sizing: border-box) {
+  -webkit-box-sizing: #{$box-sizing};
+  -moz-box-sizing: #{$box-sizing};
+  box-sizing: #{$box-sizing};
+}
+
+@function em($target, $context: $baseFontSize) {
+  @if $target == 0 {
+    @return 0;
+  }
+  @return $target / $context + 0em;
+}
+
+@function color-control($color) {
+  @if (lightness( $color ) > 40) {
+    @return #000;
+  }
+  @else {
+    @return #fff;
+  }
+}
+
+/*============================================================================
+  Dependency-free breakpoint mixin
+    - http://blog.grayghostvisuals.com/sass/sass-media-query-mixin/
+==============================================================================*/
+$min: min-width;
+$max: max-width;
+@mixin at-query ($constraint, $viewport1, $viewport2:null) {
+  @if $constraint == $min {
+    @media screen and ($min: $viewport1) {
+      @content;
+    }
+  } @else if $constraint == $max {
+    @media screen and ($max: $viewport1) {
+      @content;
+    }
+  } @else {
+    @media screen and ($min: $viewport1) and ($max: $viewport2) {
+      @content;
+    }
+  }
+}
+
+
+/*============================================================================
+  #Normalize
+==============================================================================*/
+*, input, :before, :after {
+  @include box-sizing();
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+}
+
+article, aside, details, figcaption, figure, footer, header, hgroup, main, nav, section, summary {
+  display: block;
+}
+
+audio, canvas, progress, video {
+  display: inline-block;
+  vertical-align: baseline;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  height: auto;
+}
+
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+
+/*============================================================================
+  #Grid Setup
+    - Based on csswizardry grid, but with floated columns, a fixed gutter size, and BEM classes
+    - Breakpoints defined above, under #Breakpoint and Grid Variables
+    - Note the inclusion of .grid-uniform to take care of clearfixes on evenly sized grid items
+==============================================================================*/
+$responsive:         true;
+$mobile-first:       true;
+$use-silent-classes: false;
+$push:               true;
+$pull:               false;
+
+/* Force clearfix on grids */
+.grid,
+.grid-uniform {
+  @include clearfix;
+}
+
+/* Manual grid__item clearfix */
+.grid__item.clear {
+  clear: both;
+}
+
+$class-type: unquote(".");
+
+@if $use-silent-classes == true {
+  $class-type: unquote("%");
+}
+
+@mixin grid-media-query($media-query) {
+  $breakpoint-found: false;
+
+  @each $breakpoint in $breakpoints {
+    $name: nth($breakpoint, 1);
+    $declaration: nth($breakpoint, 2);
+
+    @if $media-query == $name and $declaration {
+      $breakpoint-found: true;
+
+      @media only screen and #{$declaration} {
+        @content;
+      }
+    }
+  }
+
+  @if $breakpoint-found == false {
+    @warn "Breakpoint '#{$media-query}' does not exist";
+  }
+}
+
+
+/*============================================================================
+  Drop relative positioning into silent classes which can't take advantage of
+  the `[class*="push--"]` and `[class*="pull--"]` selectors.
+==============================================================================*/
+@mixin silent-relative() {
+  @if $use-silent-classes == true {
+    position:relative;
+  }
+}
+
+/*============================================================================
+  Grid Setup
+    1. Allow the grid system to be used on lists.
+    2. Remove any margins and paddings that might affect the grid system.
+    3. Apply a negative `margin-left` to negate the columns' gutters.
+==============================================================================*/
+#{$class-type}grid,
+#{$class-type}grid-uniform {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  margin-left: -$gridGutter;
+}
+
+#{$class-type}grid__item {
+  float: left;
+  min-height: 1px;
+  padding-left: $gridGutter;
+  vertical-align: top;
+  @if $mobile-first == true {
+    width: 100%;
+  }
+  @include box-sizing();
+}
+
+/*============================================================================
+  Reversed grids allow you to structure your source in the opposite
+  order to how your rendered layout will appear.
+==============================================================================*/
+#{$class-type}grid--rev {
+  @extend #{$class-type}grid;
+  direction: rtl;
+  text-align: left;
+
+  > #{$class-type}grid__item {
+    direction: ltr;
+    text-align: left;
+    float: right;
+  }
+}
+
+/* Gutterless grids have all the properties of regular grids, minus any spacing. */
+#{$class-type}grid--full {
+  @extend #{$class-type}grid;
+  margin-left: 0;
+
+  > #{$class-type}grid__item {
+    padding-left: 0;
+  }
+}
+
+/*============================================================================
+  WIDTHS
+    - Create width classes, prefixed by the specified namespace.
+==============================================================================*/
+@mixin device-type($namespace:"") {
+  /** Whole */
+  #{$class-type}#{$namespace}one-whole       { width: 100%; }
+
+  /* Halves */
+  #{$class-type}#{$namespace}one-half        { width: 50%; }
+
+  /* Thirds */
+  #{$class-type}#{$namespace}one-third       { width: 33.333%; }
+  #{$class-type}#{$namespace}two-thirds      { width: 66.666%; }
+
+  /* Quarters */
+  #{$class-type}#{$namespace}one-quarter     { width: 25%; }
+  #{$class-type}#{$namespace}two-quarters    { width: 50%; }
+  #{$class-type}#{$namespace}three-quarters  { width: 75%; }
+
+  /* Fifths */
+  #{$class-type}#{$namespace}one-fifth       { width: 20%; }
+  #{$class-type}#{$namespace}two-fifths      { width: 40%; }
+  #{$class-type}#{$namespace}three-fifths    { width: 60%; }
+  #{$class-type}#{$namespace}four-fifths     { width: 80%; }
+
+  /* Sixths */
+  #{$class-type}#{$namespace}one-sixth       { width: 16.666%; }
+  #{$class-type}#{$namespace}two-sixths      { width: 33.333%; }
+  #{$class-type}#{$namespace}three-sixths    { width: 50%; }
+  #{$class-type}#{$namespace}four-sixths     { width: 66.666%; }
+  #{$class-type}#{$namespace}five-sixths     { width: 83.333%; }
+
+  /* Eighths */
+  #{$class-type}#{$namespace}one-eighth      { width: 12.5%; }
+  #{$class-type}#{$namespace}two-eighths     { width: 25%; }
+  #{$class-type}#{$namespace}three-eighths   { width: 37.5%; }
+  #{$class-type}#{$namespace}four-eighths    { width: 50%; }
+  #{$class-type}#{$namespace}five-eighths    { width: 62.5%; }
+  #{$class-type}#{$namespace}six-eighths     { width: 75%; }
+  #{$class-type}#{$namespace}seven-eighths   { width: 87.5%; }
+
+  /* Tenths */
+  #{$class-type}#{$namespace}one-tenth       { width: 10%; }
+  #{$class-type}#{$namespace}two-tenths      { width: 20%; }
+  #{$class-type}#{$namespace}three-tenths    { width: 30%; }
+  #{$class-type}#{$namespace}four-tenths     { width: 40%; }
+  #{$class-type}#{$namespace}five-tenths     { width: 50%; }
+  #{$class-type}#{$namespace}six-tenths      { width: 60%; }
+  #{$class-type}#{$namespace}seven-tenths    { width: 70%; }
+  #{$class-type}#{$namespace}eight-tenths    { width: 80%; }
+  #{$class-type}#{$namespace}nine-tenths     { width: 90%; }
+
+  /* Twelfths */
+  #{$class-type}#{$namespace}one-twelfth     { width: 8.333%; }
+  #{$class-type}#{$namespace}two-twelfths    { width: 16.666%; }
+  #{$class-type}#{$namespace}three-twelfths  { width: 25%; }
+  #{$class-type}#{$namespace}four-twelfths   { width: 33.333%; }
+  #{$class-type}#{$namespace}five-twelfths   { width: 41.666% }
+  #{$class-type}#{$namespace}six-twelfths    { width: 50%; }
+  #{$class-type}#{$namespace}seven-twelfths  { width: 58.333%; }
+  #{$class-type}#{$namespace}eight-twelfths  { width: 66.666%; }
+  #{$class-type}#{$namespace}nine-twelfths   { width: 75%; }
+  #{$class-type}#{$namespace}ten-twelfths    { width: 83.333%; }
+  #{$class-type}#{$namespace}eleven-twelfths { width: 91.666%; }
+}
+
+/*================ Clearfix helper on uniform grids ================*/
+@mixin clearfix-helper($namespace:"") {
+  .grid-uniform {
+    #{$class-type}#{$namespace}one-half:nth-child(2n+1),
+    #{$class-type}#{$namespace}one-third:nth-child(3n+1),
+    #{$class-type}#{$namespace}one-quarter:nth-child(4n+1),
+    #{$class-type}#{$namespace}one-fifth:nth-child(5n+1),
+    #{$class-type}#{$namespace}one-sixth:nth-child(6n+1),
+    #{$class-type}#{$namespace}two-sixths:nth-child(3n+1),
+    #{$class-type}#{$namespace}three-sixths:nth-child(2n+1),
+    #{$class-type}#{$namespace}two-eighths:nth-child(4n+1),
+    #{$class-type}#{$namespace}four-eighths:nth-child(2n+1),
+    #{$class-type}#{$namespace}five-tenths:nth-child(2n+1),
+    #{$class-type}#{$namespace}one-twelfth:nth-child(12n+1),
+    #{$class-type}#{$namespace}two-twelfths:nth-child(6n+1),
+    #{$class-type}#{$namespace}three-twelfths:nth-child(4n+1),
+    #{$class-type}#{$namespace}four-twelfths:nth-child(3n+1),
+    #{$class-type}#{$namespace}six-twelfths:nth-child(2n+1)    { clear: both; }
+  }
+}
+
+/*================ Helper show/hide classes around our breakpoints ================*/
+@mixin device-helper($namespace:"") {
+  #{$class-type}#{$namespace}show        { display: block!important; }
+  #{$class-type}#{$namespace}hide        { display: none!important; }
+
+  #{$class-type}#{$namespace}text-left   { text-align: left!important; }
+  #{$class-type}#{$namespace}text-right  { text-align: right!important; }
+  #{$class-type}#{$namespace}text-center { text-align: center!important; }
+
+  #{$class-type}#{$namespace}left        { float: left!important; }
+  #{$class-type}#{$namespace}right       { float: right!important; }
+}
+
+/*================ Our regular, non-responsive width and helper classes ================*/
+@include device-type();
+@include device-helper();
+
+/*================ Our responsive classes, if we have enabled them ================*/
+@if $responsive == true {
+  @each $name in $breakpoint-has-widths {
+    @include grid-media-query($name) {
+      @include device-type('#{$name}--');
+      @include device-helper('#{$name}--');
+      @include clearfix-helper('#{$name}--');
+    }
+  }
+}
+
+/*============================================================================
+  PUSH
+    - Push classes, to move grid items over to the right by certain amounts
+==============================================================================*/
+@mixin push-setup($namespace: "") {
+  /* Whole */
+  #{$class-type}push--#{$namespace}one-whole       { left: 100%; @include silent-relative(); }
+
+  /* Halves */
+  #{$class-type}push--#{$namespace}one-half        { left: 50%; @include silent-relative(); }
+
+  /* Thirds */
+  #{$class-type}push--#{$namespace}one-third       { left: 33.333%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}two-thirds      { left: 66.666%; @include silent-relative(); }
+
+  /* Quarters */
+  #{$class-type}push--#{$namespace}one-quarter     { left: 25%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}two-quarters    { left: 50%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}three-quarters  { left: 75%; @include silent-relative(); }
+
+  /* Fifths */
+  #{$class-type}push--#{$namespace}one-fifth       { left: 20%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}two-fifths      { left: 40%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}three-fifths    { left: 60%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}four-fifths     { left: 80%; @include silent-relative(); }
+
+  /* Sixths */
+  #{$class-type}push--#{$namespace}one-sixth       { left: 16.666%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}two-sixths      { left: 33.333%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}three-sixths    { left: 50%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}four-sixths     { left: 66.666%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}five-sixths     { left: 83.333%; @include silent-relative(); }
+
+  /* Eighths */
+  #{$class-type}push--#{$namespace}one-eighth      { left: 12.5%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}two-eighths     { left: 25%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}three-eighths   { left: 37.5%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}four-eighths    { left: 50%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}five-eighths    { left: 62.5%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}six-eighths     { left: 75%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}seven-eighths   { left: 87.5%; @include silent-relative(); }
+
+  /* Tenths */
+  #{$class-type}push--#{$namespace}one-tenth       { left: 10%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}two-tenths      { left: 20%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}three-tenths    { left: 30%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}four-tenths     { left: 40%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}five-tenths     { left: 50%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}six-tenths      { left: 60%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}seven-tenths    { left: 70%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}eight-tenths    { left: 80%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}nine-tenths     { left: 90%; @include silent-relative(); }
+
+  /* Twelfths */
+  #{$class-type}push--#{$namespace}one-twelfth     { left: 8.333%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}two-twelfths    { left: 16.666%; @include silent-relative();  }
+  #{$class-type}push--#{$namespace}three-twelfths  { left: 25%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}four-twelfths   { left: 33.333%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}five-twelfths   { left: 41.666%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}six-twelfths    { left: 50%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}seven-twelfths  { left: 58.333%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}eight-twelfths  { left: 66.666%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}nine-twelfths   { left: 75%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}ten-twelfths    { left: 83.333%; @include silent-relative(); }
+  #{$class-type}push--#{$namespace}eleven-twelfths { left: 91.666%; @include silent-relative(); }
+}
+
+@if $push == true {
+  [class*="push--"]{ position:relative; }
+
+  @include push-setup();
+
+  @if $responsive == true {
+    @each $name in $breakpoint-has-push {
+      @include grid-media-query($name) {
+        @include push-setup('#{$name}--');
+      }
+    }
+  }
+}
+
+/*============================================================================
+  PULL
+    - Pull classes, to move grid items back to the left by certain amounts
+==============================================================================*/
+@mixin pull-setup($namespace: "") {
+  /* Whole */
+  #{$class-type}pull--#{$namespace}one-whole       { right: 100%; @include silent-relative(); }
+
+  /* Halves */
+  #{$class-type}pull--#{$namespace}one-half        { right: 50%; @include silent-relative(); }
+
+  /* Thirds */
+  #{$class-type}pull--#{$namespace}one-third       { right: 33.333%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}two-thirds      { right: 66.666%; @include silent-relative(); }
+
+  /* Quarters */
+  #{$class-type}pull--#{$namespace}one-quarter     { right: 25%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}two-quarters    { right: 50%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}three-quarters  { right: 75%; @include silent-relative(); }
+
+  /* Fifths */
+  #{$class-type}pull--#{$namespace}one-fifth       { right: 20%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}two-fifths      { right: 40%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}three-fifths    { right: 60%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}four-fifths     { right: 80%; @include silent-relative(); }
+
+  /* Sixths */
+  #{$class-type}pull--#{$namespace}one-sixth       { right: 16.666%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}two-sixths      { right: 33.333%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}three-sixths    { right: 50%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}four-sixths     { right: 66.666%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}five-sixths     { right: 83.333%; @include silent-relative(); }
+
+  /* Eighths */
+  #{$class-type}pull--#{$namespace}one-eighth      { right: 12.5%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}two-eighths     { right: 25%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}three-eighths   { right: 37.5%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}four-eighths    { right: 50%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}five-eighths    { right: 62.5%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}six-eighths     { right: 75%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}seven-eighths   { right: 87.5%; @include silent-relative(); }
+
+  /* Tenths */
+  #{$class-type}pull--#{$namespace}one-tenth       { right: 10%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}two-tenths      { right: 20%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}three-tenths    { right: 30%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}four-tenths     { right: 40%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}five-tenths     { right: 50%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}six-tenths      { right: 60%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}seven-tenths    { right: 70%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}eight-tenths    { right: 80%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}nine-tenths     { right: 90%; @include silent-relative(); }
+
+  /* Twelfths */
+  #{$class-type}pull--#{$namespace}one-twelfth     { right: 8.333%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}two-twelfths    { right: 16.666%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}three-twelfths  { right: 25%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}four-twelfths   { right: 33.333%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}five-twelfths   { right: 41.666%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}six-twelfths    { right: 50%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}seven-twelfths  { right: 58.333%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}eight-twelfths  { right: 66.666%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}nine-twelfths   { right: 75%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}ten-twelfths    { right: 83.333%; @include silent-relative(); }
+  #{$class-type}pull--#{$namespace}eleven-twelfths { right: 91.666%; @include silent-relative(); }
+}
+
+@if $pull == true {
+  [class*="pull--"]{ position:relative; }
+
+  @include pull-setup();
+
+  @if $responsive == true {
+    @each $name in $breakpoint-has-pull {
+      @include grid-media-query($name) {
+        @include pull-setup('#{$name}--');
+      }
+    }
+  }
+}
+/* ======================================================================
+
+Bourbon Start
+http://bourbon.io/
+
+=========================================================================*/
+$asset-pipeline: false !default;
+
+// Variable settings for /addons/prefixer.scss
+$prefix-for-webkit:    true !default;
+$prefix-for-mozilla:   true !default;
+$prefix-for-microsoft: true !default;
+$prefix-for-opera:     true !default;
+$prefix-for-spec:      true !default; // required for keyframe mixin
+
+$em-base: 16px !default;
+
+/* ================================================================= 
+End Bourbon
+===================================================================*/
+// ==============================================================================
+// #Basic Styles
+// ==============================================================================
+html {
+  background-color: $colorFooterBg;
+}
+
+body {
+  background-color: $colorBody;
+}
+
+[tabindex='-1']:focus {
+  outline: none;
+}
+
+.wrapper {
+  @include clearfix();
+  max-width: $siteWidth;
+  margin: 0 auto;
+  padding: 0 ($gutter / 2);
+
+  @include at-query ($min, $small) {
+    padding: 0 $gutter;
+  }
+}
+
+.main-content {
+  display: block;
+  margin-top: $gutter;
+  padding-bottom: $gutter * 2;
+}
+// ==============================================================================
+// #Helper Classes
+// ==============================================================================
+.display-table {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.display-table-cell {
+  display: table-cell;
+  vertical-align: middle;
+  float: none;
+}
+
+@include at-query ($min, $large) {
+  .large--display-table {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+  }
+
+  .large--display-table-cell {
+    display: table-cell;
+    vertical-align: middle;
+    float: none;
+  }
+}
+
+// ==============================================================================
+// #Typography
+// ==============================================================================
+body,
+input,
+textarea,
+button,
+select {
+  font-size: $baseFontSize;
+  line-height: 1.6;
+  font-family: $bodyFontStack;
+  color: $colorTextBody;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: $headerFontStack;
+  font-weight: $headerFontWeight;
+  margin: 0 0 0.5em;
+  line-height: 1.4;
+
+  a {
+    text-decoration: none;
+    font-weight: inherit;
+  }
+}
+
+/*================ Use em() Sass function to declare font-size ================*/
+h1 {
+  font-size: em(36px);
+}
+
+h2 {
+  font-size: em(28px);
+}
+
+h3 {
+  font-size: em(22px);
+}
+
+h4 {
+  font-size: em(20px);
+}
+
+h5 {
+  font-size: em(16px);
+}
+
+h6 {
+  font-size: em(14px);
+}
+
+
+.h1 { @extend h1; }
+.h2 { @extend h2; }
+.h3 { @extend h3; }
+.h4 { @extend h4; }
+.h5 { @extend h5; }
+.h6 { @extend h6; }
+
+p {
+  margin: 0 0 ($gutter / 2) 0;
+
+  img {
+    margin: 0;
+  }
+}
+
+em {
+  font-style: italic;
+}
+
+b, strong {
+  font-weight: bold;
+}
+
+small {
+  font-size: 0.9em;
+}
+
+sup, sub {
+  position: relative;
+  font-size: 60%;
+  vertical-align: baseline;
+}
+sup {
+  top: -0.5em;
+}
+
+sub {
+  bottom: -0.5em;
+}
+
+/*================ Blockquotes ================*/
+blockquote {
+  font-size: 1.125em;
+  line-height: 1.45;
+  font-style: italic;
+  margin: 0 0 $gutter;
+  padding: ($gutter / 2) $gutter;
+  border-left: 1px solid $colorBorder;
+
+  p {
+    margin-bottom: 0;
+
+    & + cite {
+      margin-top: $gutter / 2;
+    }
+  }
+
+  cite {
+    display: block;
+    font-size: 0.75em;
+
+    &:before {
+      content: '\2014 \0020';
+    }
+  }
+}
+
+/*================ Code ================*/
+code, pre {
+  background-color: #faf7f5;
+  font-family: Consolas,monospace;
+  font-size: 1em;
+  border: 0 none;
+  padding: 0 2px;
+  color: #51ab62;
+}
+
+pre {
+  overflow: auto;
+  padding: $gutter / 2;
+  margin: 0 0 $gutter;
+}
+
+/*================ Horizontal Rules ================*/
+hr {
+  clear: both;
+  border-top: solid $colorBorder;
+  border-width: 1px 0 0;
+  margin: $gutter 0;
+  height: 0;
+
+  &.hr--small {
+    margin: ($gutter / 2) 0;
+  }
+
+  &.hr--clear {
+    border-top-color: transparent;
+  }
+}
+
+/*================ Section Headers ================*/
+.section-header {
+  margin-bottom: $gutter / 1.5;
+}
+
+@include at-query ($min, $large) {
+  .section-header {
+    display: table;
+    width: 100%;
+  }
+
+  .section-header__title {
+    margin-bottom: $gutter / 2.5;
+  }
+
+  .section-header__left {
+    display: table-cell;
+    vertical-align: middle;
+    margin-bottom: 0;
+
+    h1, h2, h3, h4,
+    .h1, .h2, .h3, .h4 {
+      margin-bottom: 0;
+    }
+  }
+
+  .section-header__right {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: right;
+    width: 335px;
+
+    @include at-query ($max, $medium) {
+      margin-bottom: $gutter;
+    }
+  }
+}
+
+.section-header__right {
+  .form-horizontal,
+  .collection-view {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  @include at-query ($min, $postSmall) {
+    label + select,
+    .collection-view {
+      margin-left: $gutter / 2;
+    }
+  }
+}
+
+.collection-view {
+  display: inline-block;
+  border: 1px solid $colorBorder;
+  border-radius: $radius;
+  padding: 0 5px;
+  height: 37px; // same as form elements
+  overflow: hidden;
+
+  /*================ Only show on larger screens ================*/
+  @include at-query ($min, $large) {
+    display: inline-block;
+  }
+}
+
+.change-view {
+  display: block;
+  background: none;
+  border: 0 none;
+  float: left;
+  padding: 10px 8px;
+  color: $colorBorder;
+  line-height: 1;
+
+  &:hover,
+  &:focus {
+    color: $colorPrimary;
+  }
+}
+
+.change-view--active {
+  cursor: default;
+  color: $colorPrimary;
+}
+// ==============================================================================
+// #Rich Text Editor
+// ==============================================================================
+.rte {
+  margin-bottom: $gutter / 2;
+
+  // Add some top margin to headers from the rich text editor
+  h1, h2, h3, h4, h5, h6 {
+    margin-top: 2em;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  > div {
+    margin-bottom: $gutter / 2;
+  }
+
+  ul, ol {
+    margin-left: 35px;
+  }
+
+  ul {
+    @extend ul.disc;
+  }
+
+  li {
+    margin-bottom: 0.4em;
+  }
+}
+
+.rte-header {
+  margin-bottom: 0;
+}
+// ==============================================================================
+// #Links
+// ==============================================================================
+a,
+.text-link {
+  color: $colorLink;
+  text-decoration: underline;
+  background: transparent;
+}
+
+a:hover,
+a:focus {
+  color: $colorLinkHover;
+}
+
+button {
+  overflow: visible;
+}
+
+button[disabled],
+html input[disabled] {
+  cursor: default;
+}
+
+.btn {
+  display: inline-block;
+  padding: 8px 10px;
+  margin: 0;
+  line-height: 1.42;
+  font-weight: bold;
+  text-decoration: none;
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1px solid transparent;
+  @include prefix('user-select', 'none');
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border-radius: $radius;
+
+  /*================ Set primary button colors - can override later ================*/
+  background-color: $colorBtnPrimary;
+  color: $colorBtnPrimaryText;
+
+  &:hover {
+    background-color: $colorBtnPrimaryHover;
+    color: $colorBtnPrimaryText;
+  }
+
+  &:active,
+  &:focus {
+   background-color: $colorBtnPrimaryActive;
+   color: $colorBtnPrimaryText;
+  }
+
+  &[disabled],
+  &.disabled {
+    cursor: default;
+    color: $disabledBorder;
+    background-color: $disabledGrey;
+  }
+}
+
+.btn--secondary,
+input.btn--secondary {
+  @extend .btn;
+  background-color: $colorBtnSecondary;
+
+  &:hover {
+    background-color: $colorBtnSecondaryHover;
+    color: $colorBtnSecondaryText;
+  }
+
+  &:active,
+  &:focus {
+   background-color: $colorBtnSecondaryActive;
+   color: $colorBtnSecondaryText;
+  }
+}
+
+.btn--small {
+  padding: 4px 5px;
+  font-size: em(12px);
+}
+
+.btn--large {
+  padding: 12px 15px;
+  font-size: em(16px);
+}
+
+.btn--full {
+  width: 100%;
+}
+
+/*================ Force an input/button to look like a text link ================*/
+.text-link {
+  display: inline;
+  border: 0 none;
+  background: none;
+  padding: 0;
+  margin: 0;
+}
+// ==============================================================================
+// #Lists
+// ==============================================================================
+ul, ol {
+  margin: 0 0 $gutter;
+  padding: 0;
+}
+
+ul { list-style: none outside; }
+ol { list-style: decimal; }
+ul ul, ul ol,
+ol ol, ol ul { margin: 4px 0 5px 20px; }
+li { margin-bottom: 0.25em; }
+
+ol, ul.square, ul.disc { margin-left: 20px; }
+ul.square { list-style: square outside; }
+ul.disc { list-style: disc outside; }
+ol.alpha { list-style: lower-alpha outside; }
+
+.inline-list li {
+  display: inline-block;
+  margin-bottom: 0;
+}
+// ==============================================================================
+// #Tables
+// ==============================================================================
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+table.full {
+  width: 100%;
+  margin-bottom: 1em;
+}
+
+.table-wrap {
+  max-width: 100%;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+th {
+  font-weight: bold;
+}
+
+th, td {
+  text-align: left;
+  padding: $gutter / 2;
+  border: 1px solid $colorBorder;
+}
+
+/*============================================================================
+  #OOCSS Media Object
+    - http://www.stubbornella.org/content/2010/06/25/the-media-object-saves-hundreds-of-lines-of-code/
+==============================================================================*/
+.media,
+.media-flex {
+  overflow: hidden;
+  _overflow: visible;
+  zoom: 1;
+}
+
+.media-img {
+  float: left;
+  margin-right: $gutter;
+}
+
+.media-img-right {
+  float: right;
+  margin-left: $gutter;
+}
+
+.media-img img,
+.media-img-right img {
+  display: block;
+}
+
+/*============================================================================
+  #Images and Iframes
+==============================================================================*/
+img {
+  border: 0 none;
+}
+
+svg:not(:root) {
+  overflow: hidden;
+}
+
+img.auto,
+.grid__item img,
+.grid__item iframe {
+  max-width: 100%;
+}
+
+.video-wrapper {
+  position: relative;
+  overflow: hidden;
+  max-width: 100%;
+  padding-bottom: 56.25%;
+  height: 0;
+  height: auto;
+
+  iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+
+
+/*============================================================================
+  #Forms
+==============================================================================*/
+form {
+  margin-bottom: $gutter;
+}
+
+input,
+textarea,
+button,
+select {
+  font-size: 1em;
+}
+
+button,
+input[type="text"],
+input[type="search"],
+input[type="password"],
+input[type="email"],
+input[type="file"],
+input[type="number"],
+input[type="tel"],
+input[type="submit"],
+textarea {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+input,
+textarea,
+select,
+fieldset {
+  border-radius: $radius;
+  max-width: 100%;
+
+  &.input-full {
+    width: 100%;
+  }
+}
+
+input,
+select,
+textarea {
+  padding: 8px 10px;
+  line-height: 1.42;
+}
+
+fieldset {
+  border: 1px solid $colorBorder;
+  padding: $gutter / 2;
+}
+
+legend {
+  border: 0;
+  padding: 0;
+}
+
+optgroup {
+  font-weight: bold;
+}
+
+input {
+  display: inline-block;
+  width: auto;
+}
+
+button,
+input[type="submit"] {
+  cursor: pointer;
+}
+
+input[type="submit"] {
+  @extend .btn;
+}
+
+/*================ Input width and border ================*/
+input[type="text"],
+input[type="search"],
+input[type="password"],
+input[type="email"],
+input[type="file"],
+input[type="number"],
+input[type="tel"],
+textarea,
+select {
+  border: 1px solid $colorBorder;
+  width: 100%;
+  max-width: 100%;
+  display: block;
+  margin: 0 0 1em;
+
+  &:focus {
+    border: 1px solid darken($colorBorder, 10%);
+  }
+
+  &[disabled],
+  &.disabled {
+    cursor: default;
+    background-color: $disabledGrey;
+    border-color: $disabledBorder;
+  }
+}
+
+textarea {
+  min-height: 100px;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
+
+select {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  background-position: right center;
+  background: {
+    image: url('{{ "ico-select.svg" | asset_url }}');
+    repeat: no-repeat;
+    position: right 10px center;
+    color: transparent;
+  }
+  padding-right: 28px;
+  text-indent: 0.01px;
+  text-overflow: '';
+  cursor: pointer;
+
+  /*================ Hide the svg arrow in IE9 and below ================*/
+  .ie9 &,
+  .lt-ie9 & {
+    padding-right: 10px;
+    background-image: none;
+  }
+}
+
+// Force option color (affects IE only)
+option {
+  color: #000;
+  background-color: #fff;
+}
+
+select::-ms-expand {
+  display: none;
+}
+
+/*================ Form labels ================*/
+label,
+legend {
+  display: block;
+  margin-bottom: 2px;
+  font-weight: bold;
+
+  &.inline {
+    display: inline;
+  }
+
+  .form-horizontal &.label--hidden,
+  &.label--hidden {
+    height: 0;
+    width: 0;
+    margin-bottom: 0;
+    overflow: hidden;
+
+    .ie9 &,
+    .lt-ie9 & {
+      height: auto;
+      width: auto;
+      margin-bottom: 2px;
+      overflow: visible;
+    }
+  }
+}
+
+/*================ We don't want the same label treatment for checkboxes/radios ================*/
+input[type="checkbox"] + label,
+input[type="radio"] + label {
+  font-weight: normal;
+}
+
+label[for] {
+  cursor: pointer;
+}
+
+.label-hint {
+  color: #999;
+}
+
+/*================ Horizontal Form ================*/
+form.form-horizontal,
+.form-horizontal {
+  margin-bottom: 0;
+
+  input[type="text"],
+  input[type="search"],
+  input[type="password"],
+  input[type="email"],
+  input[type="file"],
+  input[type="number"],
+  input[type="tel"],
+  textarea,
+  select,
+  label {
+    display: inline-block;
+    margin-bottom: 0;
+    width: auto;
+  }
+}
+
+/*================ Error styles ================*/
+input[type="text"],
+input[type="search"],
+input[type="password"],
+input[type="email"],
+input[type="file"],
+input[type="number"],
+input[type="tel"],
+textarea {
+  &.error {
+    border-color: $errorRed;
+    background-color: $errorRedBg;
+    color: $errorRed;
+  }
+}
+
+label.error {
+  color: $errorRed;
+}
+
+
+/*================ Input Group ================*/
+.input-group {
+  position: relative;
+  display: table;
+  border-collapse: separate;
+
+  .input-group-field:first-child,
+  .input-group-btn:first-child,
+  .input-group-btn:first-child > .btn,
+  input[type="hidden"]:first-child + .input-group-field,
+  input[type="hidden"]:first-child + .input-group-btn > .btn {
+    border-radius: $radius 0 0 $radius;
+  }
+
+  .input-group-field:last-child,
+  .input-group-btn:last-child > .btn {
+   border-radius: 0 $radius $radius 0;
+  }
+
+  input {
+    // Nasty Firefox hack for inputs http://davidwalsh.name/firefox-buttons
+    &::-moz-focus-inner {
+      border: 0;
+      padding: 0;
+      margin-top: -1px;
+      margin-bottom: -1px;
+    }
+  }
+}
+
+.input-group-field,
+.input-group-btn {
+  display: table-cell;
+  vertical-align: middle;
+  margin: 0;
+}
+
+.input-group .btn,
+.input-group .input-group-field {
+  height: 37px;
+}
+
+.input-group .input-group-field {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.input-group-btn {
+  position: relative;
+  white-space: nowrap;
+  width: 1%;
+  padding: 0;
+}
+/*============================================================================
+  #Icons
+==============================================================================*/
+.icon-fallback-text .icon {
+  display: none;
+
+  .supports-fontface & {
+    display: inline-block;
+  }
+}
+
+/*============================================================================
+  A generic way to visually hide content while
+  remaining accessible to screen readers (h5bp.com)
+==============================================================================*/
+.supports-fontface .icon-fallback-text .fallback-text {
+  clip: rect(0 0 0 0);
+  overflow: hidden;
+  position: absolute;
+  height: 1px;
+  width: 1px;
+}
+
+.icon:before {
+  display: none;
+}
+
+.supports-fontface .icon:before {
+  display: inline;
+  font-family: $socialIconFontStack;
+  text-decoration: none;
+  speak: none; // future fallback, limited in effect currently
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/*================ Icon mapping ================*/
+.icon-american_express:before { content: "\41"; }
+.icon-arrow-down:before { content: "\34"; }
+.icon-bitcoin:before { content: "\42"; }
+.icon-cart:before { content: "\5b"; }
+.icon-cirrus:before { content: "\43"; }
+.icon-diners_club:before { content: "\63"; }
+.icon-discover:before { content: "\44"; }
+.icon-dk:before { content: "\64"; }
+.icon-facebook:before { content: "\66"; }
+.icon-fancy:before { content: "\46"; }
+.icon-google:before { content: "\67"; }
+.icon-google_wallet:before { content: "\47"; }
+.icon-grid-view:before { content: "\e603"; }
+.icon-hamburger:before { content: "\e600"; }
+.icon-instagram:before { content: "\69"; }
+.icon-interac:before { content: "\49"; }
+.icon-jcb:before { content: "\4a"; }
+.icon-list-view:before { content: "\e604"; }
+.icon-maestro:before { content: "\6d"; }
+.icon-master:before { content: "\4d"; }
+.icon-minus:before { content: "\e602"; }
+.icon-paypal:before { content: "\50"; }
+.icon-pinterest:before { content: "\70"; }
+.icon-plus:before { content: "\e605"; }
+.icon-rss:before { content: "\72"; }
+.icon-search:before { content: "\73"; }
+.icon-stripe:before { content: "\53"; }
+.icon-tumblr:before { content: "\74"; }
+.icon-twitter:before { content: "\54"; }
+.icon-vimeo:before { content: "\76"; }
+.icon-visa:before { content: "\56"; }
+.icon-x:before { content: "\78"; }
+.icon-youtube:before { content: "\79"; }
+
+.payment-icons {
+  @include prefix('user-select', 'none');
+  cursor: default;
+
+  li {
+    margin: 0 ($gutter / 4) ($gutter / 4);
+    color: {{ settings.color_footer_social_link }};
+    cursor: default;
+  }
+
+  .icon {
+    font-size: 30px;
+    line-height: 30px;
+  }
+
+  .fallback-text {
+    text-transform: capitalize;
+  }
+}
+
+.social-icons li {
+  margin: 0 ($gutter / 2) ($gutter / 2);
+  vertical-align: middle;
+
+  @include at-query ($min, $postSmall) {
+    margin-left: 0;
+  }
+
+  .icon {
+    font-size: 30px;
+    line-height: 26px;
+  }
+
+  a {
+    color: {{ settings.color_footer_social_link }};
+
+    &:hover {
+      color: darken({{ settings.color_footer_social_link }}, 10%);
+    }
+  }
+}
+
+/*============================================================================
+  #Icons
+==============================================================================*/
+.icon-fallback-text .icon {
+  display: none;
+
+  .supports-fontface & {
+    display: inline-block;
+  }
+}
+
+/*============================================================================
+  A generic way to visually hide content while
+  remaining accessible to screen readers (h5bp.com)
+==============================================================================*/
+.supports-fontface .icon-fallback-text .fallback-text {
+  clip: rect(0 0 0 0);
+  overflow: hidden;
+  position: absolute;
+  height: 1px;
+  width: 1px;
+}
+
+.icon:before {
+  display: none;
+}
+
+.supports-fontface .icon:before {
+  display: inline;
+  font-family: $socialIconFontStack;
+  text-decoration: none;
+  speak: none; // future fallback, limited in effect currently
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/*================ Icon mapping ================*/
+.icon-american_express:before { content: "\41"; }
+.icon-arrow-down:before { content: "\34"; }
+.icon-bitcoin:before { content: "\42"; }
+.icon-cart:before { content: "\5b"; }
+.icon-cirrus:before { content: "\43"; }
+.icon-diners_club:before { content: "\63"; }
+.icon-discover:before { content: "\44"; }
+.icon-dk:before { content: "\64"; }
+.icon-facebook:before { content: "\66"; }
+.icon-fancy:before { content: "\46"; }
+.icon-google:before { content: "\67"; }
+.icon-google_wallet:before { content: "\47"; }
+.icon-grid-view:before { content: "\e603"; }
+.icon-hamburger:before { content: "\e600"; }
+.icon-instagram:before { content: "\69"; }
+.icon-interac:before { content: "\49"; }
+.icon-jcb:before { content: "\4a"; }
+.icon-list-view:before { content: "\e604"; }
+.icon-maestro:before { content: "\6d"; }
+.icon-master:before { content: "\4d"; }
+.icon-minus:before { content: "\e602"; }
+.icon-paypal:before { content: "\50"; }
+.icon-pinterest:before { content: "\70"; }
+.icon-plus:before { content: "\e605"; }
+.icon-rss:before { content: "\72"; }
+.icon-search:before { content: "\73"; }
+.icon-stripe:before { content: "\53"; }
+.icon-tumblr:before { content: "\74"; }
+.icon-twitter:before { content: "\54"; }
+.icon-vimeo:before { content: "\76"; }
+.icon-visa:before { content: "\56"; }
+.icon-x:before { content: "\78"; }
+.icon-youtube:before { content: "\79"; }
+
+.payment-icons {
+  @include prefix('user-select', 'none');
+  cursor: default;
+
+  li {
+    margin: 0 ($gutter / 4) ($gutter / 4);
+    color: {{ settings.color_footer_social_link }};
+    cursor: default;
+  }
+
+  .icon {
+    font-size: 30px;
+    line-height: 30px;
+  }
+
+  .fallback-text {
+    text-transform: capitalize;
+  }
+}
+
+.social-icons li {
+  margin: 0 ($gutter / 2) ($gutter / 2);
+  vertical-align: middle;
+
+  @include at-query ($min, $postSmall) {
+    margin-left: 0;
+  }
+
+  .icon {
+    font-size: 30px;
+    line-height: 26px;
+  }
+
+  a {
+    color: {{ settings.color_footer_social_link }};
+
+    &:hover {
+      color: darken({{ settings.color_footer_social_link }}, 10%);
+    }
+  }
+}
+
+
+/*============================================================================
+  #Pagination
+==============================================================================*/
+.pagination {
+  margin-bottom: 1em;
+}
+
+/*================ Custom Pagination ================*/
+.pagination-custom {
+  display: inline-block;
+  padding-left: 0;
+  margin: 0 0 $gutter;
+  border-radius: $radius;
+}
+
+.pagination-custom > li {
+  display: inline;
+}
+
+.pagination-custom > li > a,
+.pagination-custom > li > span {
+  position: relative;
+  float: left;
+  padding: 5px 10px;
+  margin-left: -1px;
+  line-height: 1.42;
+  text-decoration: none;
+  border: 1px solid $colorBorder;
+}
+
+.pagination-custom > li:first-child > a,
+.pagination-custom > li:first-child > span {
+  margin-left: 0;
+  border-bottom-left-radius: 4px;
+  border-top-left-radius: 4px;
+}
+
+.pagination-custom > li:last-child > a,
+.pagination-custom > li:last-child > span {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.pagination-custom > li > a:hover,
+.pagination-custom > li > span:hover,
+.pagination-custom > li > a:focus,
+.pagination-custom > li > span:focus {
+  // hover color
+}
+
+.pagination-custom > .active > a,
+.pagination-custom > .active > span,
+.pagination-custom > .active > a:hover,
+.pagination-custom > .active > span:hover,
+.pagination-custom > .active > a:focus,
+.pagination-custom > .active > span:focus {
+  z-index: 2;
+  cursor: default;
+  color: $colorTextBody;
+}
+
+.pagination-custom > .disabled > span,
+.pagination-custom > .disabled > a,
+.pagination-custom > .disabled > a:hover,
+.pagination-custom > .disabled > a:focus {
+  color: #999999;
+  cursor: not-allowed;
+}
+
+.pagination-custom-lg > li > a,
+.pagination-custom-lg > li > span {
+  padding: 10px 16px;
+  font-size: em(18px);
+}
+
+.pagination-custom-lg > li:first-child > a,
+.pagination-custom-lg > li:first-child > span {
+  border-bottom-left-radius: 6px;
+  border-top-left-radius: 6px;
+}
+
+.pagination-custom-lg > li:last-child > a,
+.pagination-custom-lg > li:last-child > span {
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.pagination-custom-sm > li > a,
+.pagination-custom-sm > li > span {
+  padding: 5px 10px;
+  font-size: em(12px);
+}
+
+.pagination-custom-sm > li:first-child > a,
+.pagination-custom-sm > li:first-child > span {
+  border-bottom-left-radius: 3px;
+  border-top-left-radius: 3px;
+}
+
+.pagination-custom-sm > li:last-child > a,
+.pagination-custom-sm > li:last-child > span {
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+
+
+/*============================================================================
+  #Site Header
+==============================================================================*/
+.site-header {
+  padding: ($gutter / 2) 0;
+
+  @include at-query ($min, $large) {
+    padding: $gutter 0;
+  }
+
+  @include at-query ($min, $large) {
+    .grid {
+      display: table;
+      table-layout: fixed;
+      width: 100%;
+
+      > .grid__item {
+        float: none;
+        display: table-cell;
+        vertical-align: middle;
+      }
+    }
+  }
+}
+
+.site-header__logo {
+  text-align: center;
+  margin: 0 auto ($gutter / 2);
+  max-width: {{ settings.logo_max_width }}px;
+
+  @include at-query ($min, $large) {
+    margin-bottom: 0;
+  }
+
+  a,
+  a:hover,
+  a:focus {
+    text-decoration: none;
+  }
+
+  a, img {
+    display: block;
+  }
+
+  img {
+    margin: 0 auto;
+  }
+}
+
+.site-header__text-links {
+  margin-bottom: 0;
+}
+
+.search-bar {
+  max-width: 100%;
+
+  @include at-query ($max, $medium) {
+    margin: 0 auto;
+  }
+}
+
+/*============================================================================
+  #Site Nav and Dropdowns
+==============================================================================*/
+.nav-bar {
+  background-color: $colorNav;
+
+  ul {
+    margin: 0;
+  }
+
+  li {
+    margin: 0;
+  }
+}
+
+.site-nav {
+  font-size: em(16px);
+  cursor: default;
+
+  li {
+    margin: 0;
+    display: block;
+  }
+
+  > li {
+    position: relative;
+    display: inline-block;
+
+    &:first-child a {
+      padding-left: 0;
+    }
+  }
+
+  @include at-query ($max, $medium) {
+    margin: 0 auto;
+    text-align: center;
+  }
+}
+
+.site-nav__link {
+  display: block;
+  text-decoration: none;
+  padding: $gutter / 2;
+  white-space: nowrap;
+  color: $colorNavText;
+
+  &:hover,
+  &:active,
+  &:focus {
+    color: darken($colorNavText, 15%);
+  }
+
+  .site-nav--active > & {
+    font-weight: bold;
+  }
+}
+
+/*================ Dropdowns ================*/
+.site-nav__dropdown {
+  display: none;
+  position: absolute;
+  left: 0;
+  z-index: 5;
+
+  .supports-no-touch .site-nav--has-dropdown:hover &,
+  .site-nav--has-dropdown.nav-hover &,
+  .nav-focus + & {
+    display: block;
+  }
+
+  a {
+    background-color: $colorNav;
+
+    &:hover,
+    &:active,
+    &:focus {
+      background-color: darken($colorNav, 10%);
+    }
+  }
+}
+
+/*================ Search bar in header ================*/
+.nav-search {
+  position: relative;
+  padding: 7px 0;
+
+  @include at-query ($max, $medium) {
+    padding: 0 0 ($gutter / 2);
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .input-group,
+  .input-group-field {
+    margin-bottom: 0;
+  }
+}
+
+
+
+/*============================================================================
+  #Site Footer
+==============================================================================*/
+.site-footer {
+  background-color: $colorFooterBg;
+  border-top: 1px solid $colorBorder;
+  padding: $gutter 0;
+  color: $colorFooterText;
+
+  @include at-query ($min, $large) {
+    padding: ($gutter * 2) 0;
+  }
+}
+
+
+
+/*============================================================================
+  #Product and Collection Grids
+==============================================================================*/
+.sold-out {
+
+}
+
+.on-sale {
+
+}
+
+.grid__image {
+  display: block;
+  margin: 0 auto ($gutter / 2);
+
+  img {
+    display: block;
+    margin: 0 auto;
+  }
+}
+
+/*============================================================================
+  #Collection Filters
+==============================================================================*/
+.filter--active {
+  font-weight: bold;
+}
+
+
+/*============================================================================
+  #Breadcrumbs
+==============================================================================*/
+.breadcrumb {
+  margin-bottom: $gutter;
+
+  a,
+  span {
+    display: inline-block;
+    padding: ($gutter / 2) 7px ($gutter / 2) 0;
+    margin-right: 7px;
+
+    &:first-child {
+      padding-left: 0;
+    }
+  }
+}
+
+
+/*============================================================================
+  #Product Page
+==============================================================================*/
+.product-single__variants {
+  display: none;
+
+  .no-js & {
+    display: block;
+  }
+}
+
+@include at-query($min, $large) {
+  .selector-wrapper,
+  .product-single__variants {
+    select {
+      max-width: 40%;
+    }
+  }
+}
+
+.product-single__photos {
+  margin-bottom: $gutter;
+}
+
+.product-single__photos,
+.product-single__thumbnails {
+  a, img {
+    display: block;
+    margin: 0 auto;
+  }
+
+  li {
+    margin-bottom: $gutter;
+  }
+}
+
+
+/*============================================================================
+  #Blogs and Comments
+==============================================================================*/
+.comment {
+  margin-bottom: $gutter;
+
+  & + & {
+    border-top: 1px solid $colorBorder;
+    padding-top: $gutter;
+  }
+}
+
+
+/*============================================================================
+  #Notes and Form Feedback
+==============================================================================*/
+.note,
+.errors {
+  border-radius: $radius;
+  padding: 6px 12px;
+  margin-bottom: $gutter / 2;
+  border: 1px solid transparent;
+  font-size: 0.9em;
+  text-align: left;
+
+  ul,
+  ol {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  li:last-child {
+    margin-bottom: 0;
+  }
+
+  p {
+    margin-bottom: 0;
+  }
+}
+
+.note {
+  border-color: $colorBorder;
+}
+
+.errors {
+  ul {
+    list-style: disc outside;
+    margin-left: 20px;
+  }
+}
+
+.form-success {
+  color: $successGreen;
+  background-color: $successGreenBg;
+  border-color: $successGreen;
+
+  a {
+    color: $successGreen;
+    text-decoration: underline;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+}
+
+.form-error,
+.errors {
+  color: $errorRed;
+  background-color: $errorRedBg;
+  border-color: $errorRed;
+
+  a {
+    color: $errorRed;
+    text-decoration: underline;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+}
+
+/*============================================================================
+  #Cart Page
+==============================================================================*/
+.cart__row {
+  position: relative;
+  margin-top: $gutter;
+  padding-top: $gutter;
+  border-top: 1px solid $colorBorder;
+
+  &:first-child {
+    margin-top: 0;
+  }
+
+  &:first-child {
+    padding-top: 0;
+    border-top: 0 none;
+  }
+
+  .js-qty {
+    margin: 0;
+  }
+}
+
+@include at-query ($min, $large) {
+  .cart__row--table-large {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+
+    .grid__item {
+      display: table-cell;
+      vertical-align: middle;
+      float: none;
+    }
+  }
+}
+
+.cart__image {
+  display: block;
+
+  img {
+    display: block;
+  }
+}
+
+.cart__subtotal {
+  margin: 0 0 0 ($gutter / 3);
+  display: inline;
+}
+
+.cart__mini-labels {
+  display: block;
+  margin: ($gutter / 3) 0;
+  font-size: em(12px);
+
+  @include at-query ($min, $large) {
+    display: none;
+  }
+}
+
+.cart__remove {
+  display: block;
+}
+
+@function assign-inputs($inputs, $pseudo: null) {
+  $list : ();
+
+  @each $input in $inputs {
+    $input: unquote($input);
+    $input: if($pseudo, $input + ":" + $pseudo, $input);
+    $list: append($list, $input, comma);
+  }
+
+  @return $list;
+}
+// Programatically determines whether a color is light or dark
+// Returns a boolean
+// More details here http://robots.thoughtbot.com/closer-look-color-lightness
+
+@function is-light($hex-color) {
+  $-local-red: red(rgba($hex-color, 1.0));
+  $-local-green: green(rgba($hex-color, 1.0));
+  $-local-blue: blue(rgba($hex-color, 1.0));
+
+  $-local-lightness: ($-local-red * 0.2126 + $-local-green * 0.7152 + $-local-blue * 0.0722) / 255;
+
+  @return $-local-lightness > .6;
+}
+
+// Flexible grid
+@function flex-grid($columns, $container-columns: $fg-max-columns) {
+  $width: $columns * $fg-column + ($columns - 1) * $fg-gutter;
+  $container-width: $container-columns * $fg-column + ($container-columns - 1) * $fg-gutter;
+  @return percentage($width / $container-width);
+}
+
+// Flexible gutter
+@function flex-gutter($container-columns: $fg-max-columns, $gutter: $fg-gutter) {
+  $container-width: $container-columns * $fg-column + ($container-columns - 1) * $fg-gutter;
+  @return percentage($gutter / $container-width);
+}
+
+// The $fg-column, $fg-gutter and $fg-max-columns variables must be defined in your base stylesheet to properly use the flex-grid function.
+// This function takes the fluid grid equation (target / context = result) and uses columns to help define each.
+//
+// The calculation presumes that your column structure will be missing the last gutter:
+//
+//   -- column -- gutter -- column -- gutter -- column
+//
+//  $fg-column: 60px;             // Column Width
+//  $fg-gutter: 25px;             // Gutter Width
+//  $fg-max-columns: 12;          // Total Columns For Main Container
+//
+//  div {
+//    width: flex-grid(4);        // returns (315px / 995px) = 31.65829%;
+//    margin-left: flex-gutter(); // returns (25px / 995px) = 2.51256%;
+//
+//    p {
+//      width: flex-grid(2, 4);  // returns (145px / 315px) = 46.031746%;
+//      float: left;
+//      margin: flex-gutter(4);  // returns (25px / 315px) = 7.936508%;
+//    }
+//
+//    blockquote {
+//      float: left;
+//      width: flex-grid(2, 4); // returns (145px / 315px) = 46.031746%;
+//    }
+//  }
+@function golden-ratio($value, $increment) {
+  @return modular-scale($value, $increment, $golden)
+}
+
+@function grid-width($n) {
+  @return $n * $gw-column + ($n - 1) * $gw-gutter;
+}
+
+// The $gw-column and $gw-gutter variables must be defined in your base stylesheet to properly use the grid-width function.
+//
+//  $gw-column: 100px;         // Column Width
+//  $gw-gutter: 40px;          // Gutter Width
+//
+//  div {
+//    width: grid-width(4);    // returns 520px;
+//    margin-left: $gw-gutter; // returns 40px;
+//  }
+
+// Scaling Variables
+$golden:           1.618;
+$minor-second:     1.067;
+$major-second:     1.125;
+$minor-third:      1.2;
+$major-third:      1.25;
+$perfect-fourth:   1.333;
+$augmented-fourth: 1.414;
+$perfect-fifth:    1.5;
+$minor-sixth:      1.6;
+$major-sixth:      1.667;
+$minor-seventh:    1.778;
+$major-seventh:    1.875;
+$octave:           2;
+$major-tenth:      2.5;
+$major-eleventh:   2.667;
+$major-twelfth:    3;
+$double-octave:    4;
+
+@function modular-scale($value, $increment, $ratio) {
+  $v1: nth($value, 1);
+  $v2: nth($value, length($value));
+  $value: $v1;
+
+  // scale $v2 to just above $v1
+  @while $v2 > $v1 {
+    $v2: ($v2 / $ratio); // will be off-by-1
+  }
+  @while $v2 < $v1 {
+    $v2: ($v2 * $ratio); // will fix off-by-1
+  }
+
+  // check AFTER scaling $v2 to prevent double-counting corner-case
+  $double-stranded: $v2 > $v1;
+
+  @if $increment > 0 {
+    @for $i from 1 through $increment {
+      @if $double-stranded and ($v1 * $ratio) > $v2 {
+        $value: $v2;
+        $v2: ($v2 * $ratio);
+      } @else {
+        $v1: ($v1 * $ratio);
+        $value: $v1;
+      }
+    }
+  }
+
+  @if $increment < 0 {
+    // adjust $v2 to just below $v1
+    @if $double-stranded {
+      $v2: ($v2 / $ratio);
+    }
+
+    @for $i from $increment through -1 {
+      @if $double-stranded and ($v1 / $ratio) < $v2 {
+        $value: $v2;
+        $v2: ($v2 / $ratio);
+      } @else {
+        $v1: ($v1 / $ratio);
+        $value: $v1;
+      }
+    }
+  }
+
+  @return $value;
+}
+
+// Convert pixels to ems
+// eg. for a relational value of 12px write em(12) when the parent is 16px
+// if the parent is another value say 24px write em(12, 24)
+
+@function em($pxval, $base: $em-base) {
+  @if not unitless($pxval) {
+      $pxval: strip-units($pxval);
+  }
+  @if not unitless($base) {
+      $base: strip-units($base);
+  }
+  @return ($pxval / $base) * 1em;
+}
+
+// Convert pixels to rems
+// eg. for a relational value of 12px write rem(12)
+// Assumes $em-base is the font-size of <html>
+
+@function rem($pxval) {
+  @if not unitless($pxval) {
+      $pxval: strip-units($pxval);
+  }
+
+  $base: $em-base;
+  @if not unitless($base) {
+      $base: strip-units($base);
+  }
+  @return ($pxval / $base) * 1rem;
+}
+
+// Srtips the units from a value. e.g. 12px -> 12
+
+@function strip-units($val) {
+  @return ($val / ($val * 0 + 1));
+}
+
+// Add percentage of white to a color
+@function tint($color, $percent){
+  @return mix(white, $color, $percent);
+}
+
+// Add percentage of black to a color
+@function shade($color, $percent){
+  @return mix(black, $color, $percent);
+}
+
+// Return vendor-prefixed property names if appropriate
+// Example: transition-property-names((transform, color, background), moz) -> -moz-transform, color, background
+//************************************************************************//
+@function transition-property-names($props, $vendor: false) {
+	$new-props: ();
+	
+	@each $prop in $props {
+		$new-props: append($new-props, transition-property-name($prop, $vendor), comma);
+	}
+
+	@return $new-props;
+}
+
+@function transition-property-name($prop, $vendor: false) {
+	// put other properties that need to be prefixed here aswell
+	@if $vendor and $prop == transform {
+		@return unquote('-'+$vendor+'-'+$prop);
+	}
+	@else {
+		@return $prop;
+	}
+}
+// Convert shorthand to the 4-value syntax
+
+@function unpack($shorthand) {
+  @if length($shorthand) == 1 {
+    @return nth($shorthand, 1) nth($shorthand, 1) nth($shorthand, 1) nth($shorthand, 1);
+  }
+  @else if length($shorthand) == 2 {
+    @return nth($shorthand, 1) nth($shorthand, 2) nth($shorthand, 1) nth($shorthand, 2);
+  }
+  @else if length($shorthand) == 3 {
+    @return nth($shorthand, 1) nth($shorthand, 2) nth($shorthand, 3) nth($shorthand, 2);
+  }
+  @else {
+    @return $shorthand;
+  }
+}
+
+
+/*=================================================================
+======================================================================
+
+
+            BOURBON.IO
+buttons
+
+
+======================================================================
+======================================================================*/
+@mixin button ($style: simple, $base-color: #4294f0, $text-size: inherit, $padding: 7px 18px) {
+
+  @if type-of($style) == string and type-of($base-color) == color {
+    @include buttonstyle($style, $base-color, $text-size, $padding);
+  }
+
+  @if type-of($style) == string and type-of($base-color) == number {
+    $padding: $text-size;
+    $text-size: $base-color;
+    $base-color: #4294f0;
+
+    @if $padding == inherit {
+      $padding: 7px 18px;
+    }
+
+    @include buttonstyle($style, $base-color, $text-size, $padding);
+  }
+
+  @if type-of($style) == color and type-of($base-color) == color {
+    $base-color: $style;
+    $style: simple;
+    @include buttonstyle($style, $base-color, $text-size, $padding);
+  }
+
+  @if type-of($style) == color and type-of($base-color) == number {
+    $padding: $text-size;
+    $text-size: $base-color;
+    $base-color: $style;
+    $style: simple;
+
+    @if $padding == inherit {
+      $padding: 7px 18px;
+    }
+
+    @include buttonstyle($style, $base-color, $text-size, $padding);
+  }
+
+  @if type-of($style) == number {
+    $padding: $base-color;
+    $text-size: $style;
+    $base-color: #4294f0;
+    $style: simple;
+
+    @if $padding == #4294f0 {
+      $padding: 7px 18px;
+    }
+
+    @include buttonstyle($style, $base-color, $text-size, $padding);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+
+// Selector Style Button
+//************************************************************************//
+@mixin buttonstyle($type, $b-color, $t-size, $pad) {
+  // Grayscale button
+  @if $type == simple and $b-color == grayscale($b-color) {
+    @include simple($b-color, true, $t-size, $pad);
+  }
+
+  @if $type == shiny and $b-color == grayscale($b-color) {
+    @include shiny($b-color, true, $t-size, $pad);
+  }
+
+  @if $type == pill and $b-color == grayscale($b-color) {
+    @include pill($b-color, true, $t-size, $pad);
+  }
+
+  @if $type == flat and $b-color == grayscale($b-color) {
+    @include flat($b-color, true, $t-size, $pad);
+  }
+
+  // Colored button
+  @if $type == simple {
+    @include simple($b-color, false, $t-size, $pad);
+  }
+
+  @else if $type == shiny {
+    @include shiny($b-color, false, $t-size, $pad);
+  }
+
+  @else if $type == pill {
+    @include pill($b-color, false, $t-size, $pad);
+  }
+
+  @else if $type == flat {
+    @include flat($b-color, false, $t-size, $pad);
+  }
+}
+
+
+// Simple Button
+//************************************************************************//
+@mixin simple($base-color, $grayscale: false, $textsize: inherit, $padding: 7px 18px) {
+  $color:         hsl(0, 0, 100%);
+  $border:        adjust-color($base-color, $saturation:  9%,  $lightness: -14%);
+  $inset-shadow:  adjust-color($base-color, $saturation: -8%,  $lightness:  15%);
+  $stop-gradient: adjust-color($base-color, $saturation:  9%,  $lightness: -11%);
+  $text-shadow:   adjust-color($base-color, $saturation:  15%, $lightness: -18%);
+
+  @if is-light($base-color) {
+    $color:       hsl(0, 0, 20%);
+    $text-shadow: adjust-color($base-color, $saturation: 10%, $lightness: 4%);
+  }
+
+  @if $grayscale == true {
+    $border:        grayscale($border);
+    $inset-shadow:  grayscale($inset-shadow);
+    $stop-gradient: grayscale($stop-gradient);
+    $text-shadow:   grayscale($text-shadow);
+  }
+
+  border: 1px solid $border;
+  border-radius: 3px;
+  box-shadow: inset 0 1px 0 0 $inset-shadow;
+  color: $color;
+  display: inline-block;
+  font-size: $textsize;
+  font-weight: bold;
+  @include linear-gradient ($base-color, $stop-gradient);
+  padding: $padding;
+  text-decoration: none;
+  text-shadow: 0 1px 0 $text-shadow;
+  background-clip: padding-box;
+
+  &:hover:not(:disabled) {
+    $base-color-hover:    adjust-color($base-color, $saturation: -4%, $lightness: -5%);
+    $inset-shadow-hover:  adjust-color($base-color, $saturation: -7%, $lightness:  5%);
+    $stop-gradient-hover: adjust-color($base-color, $saturation:  8%, $lightness: -14%);
+
+    @if $grayscale == true {
+      $base-color-hover:    grayscale($base-color-hover);
+      $inset-shadow-hover:  grayscale($inset-shadow-hover);
+      $stop-gradient-hover: grayscale($stop-gradient-hover);
+    }
+
+    box-shadow: inset 0 1px 0 0 $inset-shadow-hover;
+    cursor: pointer;
+    @include linear-gradient ($base-color-hover, $stop-gradient-hover);
+  }
+
+  &:active:not(:disabled),
+  &:focus:not(:disabled) {
+    $border-active:       adjust-color($base-color, $saturation: 9%, $lightness: -14%);
+    $inset-shadow-active: adjust-color($base-color, $saturation: 7%, $lightness: -17%);
+
+    @if $grayscale == true {
+      $border-active:       grayscale($border-active);
+      $inset-shadow-active: grayscale($inset-shadow-active);
+    }
+
+    border: 1px solid $border-active;
+    box-shadow: inset 0 0 8px 4px $inset-shadow-active, inset 0 0 8px 4px $inset-shadow-active;
+  }
+}
+
+
+// Shiny Button
+//************************************************************************//
+@mixin shiny($base-color, $grayscale: false, $textsize: inherit, $padding: 7px 18px) {
+  $color:         hsl(0, 0, 100%);
+  $border:        adjust-color($base-color, $red: -117, $green: -111, $blue: -81);
+  $border-bottom: adjust-color($base-color, $red: -126, $green: -127, $blue: -122);
+  $fourth-stop:   adjust-color($base-color, $red: -79,  $green: -70,  $blue: -46);
+  $inset-shadow:  adjust-color($base-color, $red:  37,  $green:  29,  $blue:  12);
+  $second-stop:   adjust-color($base-color, $red: -56,  $green: -50,  $blue: -33);
+  $text-shadow:   adjust-color($base-color, $red: -140, $green: -141, $blue: -114);
+  $third-stop:    adjust-color($base-color, $red: -86,  $green: -75,  $blue: -48);
+
+  @if is-light($base-color) {
+    $color:       hsl(0, 0, 20%);
+    $text-shadow: adjust-color($base-color, $saturation: 10%, $lightness: 4%);
+  }
+
+  @if $grayscale == true {
+    $border:        grayscale($border);
+    $border-bottom: grayscale($border-bottom);
+    $fourth-stop:   grayscale($fourth-stop);
+    $inset-shadow:  grayscale($inset-shadow);
+    $second-stop:   grayscale($second-stop);
+    $text-shadow:   grayscale($text-shadow);
+    $third-stop:    grayscale($third-stop);
+  }
+
+  border: 1px solid $border;
+  border-bottom: 1px solid $border-bottom;
+  border-radius: 5px;
+  box-shadow: inset 0 1px 0 0 $inset-shadow;
+  color: $color;
+  display: inline-block;
+  font-size: $textsize;
+  font-weight: bold;
+  @include linear-gradient(top, $base-color 0%, $second-stop 50%, $third-stop 50%, $fourth-stop 100%);
+  padding: $padding;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: 0 -1px 1px $text-shadow;
+
+  &:hover:not(:disabled) {
+    $first-stop-hover:  adjust-color($base-color, $red: -13, $green: -15, $blue: -18);
+    $second-stop-hover: adjust-color($base-color, $red: -66, $green: -62, $blue: -51);
+    $third-stop-hover:  adjust-color($base-color, $red: -93, $green: -85, $blue: -66);
+    $fourth-stop-hover: adjust-color($base-color, $red: -86, $green: -80, $blue: -63);
+
+    @if $grayscale == true {
+      $first-stop-hover:  grayscale($first-stop-hover);
+      $second-stop-hover: grayscale($second-stop-hover);
+      $third-stop-hover:  grayscale($third-stop-hover);
+      $fourth-stop-hover: grayscale($fourth-stop-hover);
+    }
+
+    cursor: pointer;
+    @include linear-gradient(top, $first-stop-hover  0%,
+                                  $second-stop-hover 50%,
+                                  $third-stop-hover  50%,
+                                  $fourth-stop-hover 100%);
+  }
+
+  &:active:not(:disabled),
+  &:focus:not(:disabled) {
+    $inset-shadow-active: adjust-color($base-color, $red: -111, $green: -116, $blue: -122);
+
+    @if $grayscale == true {
+      $inset-shadow-active: grayscale($inset-shadow-active);
+    }
+
+    box-shadow: inset 0 0 20px 0 $inset-shadow-active;
+  }
+}
+
+
+// Pill Button
+//************************************************************************//
+@mixin pill($base-color, $grayscale: false, $textsize: inherit, $padding: 7px 18px) {
+  $color:         hsl(0, 0, 100%);
+  $border-bottom: adjust-color($base-color, $hue:  8, $saturation: -11%, $lightness: -26%);
+  $border-sides:  adjust-color($base-color, $hue:  4, $saturation: -21%, $lightness: -21%);
+  $border-top:    adjust-color($base-color, $hue: -1, $saturation: -30%, $lightness: -15%);
+  $inset-shadow:  adjust-color($base-color, $hue: -1, $saturation: -1%,  $lightness:  7%);
+  $stop-gradient: adjust-color($base-color, $hue:  8, $saturation:  14%, $lightness: -10%);
+  $text-shadow:   adjust-color($base-color, $hue:  5, $saturation: -19%, $lightness: -15%);
+
+  @if is-light($base-color) {
+    $color:       hsl(0, 0, 20%);
+    $text-shadow: adjust-color($base-color, $saturation: 10%, $lightness: 4%);
+  }
+
+  @if $grayscale == true {
+    $border-bottom: grayscale($border-bottom);
+    $border-sides:  grayscale($border-sides);
+    $border-top:    grayscale($border-top);
+    $inset-shadow:  grayscale($inset-shadow);
+    $stop-gradient: grayscale($stop-gradient);
+    $text-shadow:   grayscale($text-shadow);
+  }
+
+  border: 1px solid $border-top;
+  border-color: $border-top $border-sides $border-bottom;
+  border-radius: 16px;
+  box-shadow: inset 0 1px 0 0 $inset-shadow;
+  color: $color;
+  display: inline-block;
+  font-size: $textsize;
+  font-weight: normal;
+  line-height: 1;
+  @include linear-gradient ($base-color, $stop-gradient);
+  padding: $padding;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: 0 -1px 1px $text-shadow;
+  background-clip: padding-box;
+
+  &:hover:not(:disabled) {
+    $base-color-hover:    adjust-color($base-color,                                $lightness: -4.5%);
+    $border-bottom:       adjust-color($base-color, $hue:  8, $saturation:  13.5%, $lightness: -32%);
+    $border-sides:        adjust-color($base-color, $hue:  4, $saturation: -2%,    $lightness: -27%);
+    $border-top:          adjust-color($base-color, $hue: -1, $saturation: -17%,   $lightness: -21%);
+    $inset-shadow-hover:  adjust-color($base-color,           $saturation: -1%,    $lightness:  3%);
+    $stop-gradient-hover: adjust-color($base-color, $hue:  8, $saturation: -4%,    $lightness: -15.5%);
+    $text-shadow-hover:   adjust-color($base-color, $hue:  5, $saturation: -5%,    $lightness: -22%);
+
+    @if $grayscale == true {
+      $base-color-hover:    grayscale($base-color-hover);
+      $border-bottom:       grayscale($border-bottom);
+      $border-sides:        grayscale($border-sides);
+      $border-top:          grayscale($border-top);
+      $inset-shadow-hover:  grayscale($inset-shadow-hover);
+      $stop-gradient-hover: grayscale($stop-gradient-hover);
+      $text-shadow-hover:   grayscale($text-shadow-hover);
+    }
+
+    border: 1px solid $border-top;
+    border-color: $border-top $border-sides $border-bottom;
+    box-shadow: inset 0 1px 0 0 $inset-shadow-hover;
+    cursor: pointer;
+    @include linear-gradient ($base-color-hover, $stop-gradient-hover);
+    text-shadow: 0 -1px 1px $text-shadow-hover;
+    background-clip: padding-box;
+  }
+
+  &:active:not(:disabled),
+  &:focus:not(:disabled) {
+    $active-color:         adjust-color($base-color, $hue: 4,  $saturation: -12%,  $lightness: -10%);
+    $border-active:        adjust-color($base-color, $hue: 6,  $saturation: -2.5%, $lightness: -30%);
+    $border-bottom-active: adjust-color($base-color, $hue: 11, $saturation:  6%,   $lightness: -31%);
+    $inset-shadow-active:  adjust-color($base-color, $hue: 9,  $saturation:  2%,   $lightness: -21.5%);
+    $text-shadow-active:   adjust-color($base-color, $hue: 5,  $saturation: -12%,  $lightness: -21.5%);
+
+    @if $grayscale == true {
+      $active-color:         grayscale($active-color);
+      $border-active:        grayscale($border-active);
+      $border-bottom-active: grayscale($border-bottom-active);
+      $inset-shadow-active:  grayscale($inset-shadow-active);
+      $text-shadow-active:   grayscale($text-shadow-active);
+    }
+
+    background: $active-color;
+    border: 1px solid $border-active;
+    border-bottom: 1px solid $border-bottom-active;
+    box-shadow: inset 0 0 6px 3px $inset-shadow-active;
+    text-shadow: 0 -1px 1px $text-shadow-active;
+  }
+}
+
+
+
+// Flat Button
+//************************************************************************//
+@mixin flat($base-color, $grayscale: false, $textsize: inherit, $padding: 7px 18px) {
+  $color:         hsl(0, 0, 100%);
+
+  @if is-light($base-color) {
+    $color:       hsl(0, 0, 20%);
+  }
+
+  background-color: $base-color;
+  border-radius: 3px;
+  border: none;
+  color: $color;
+  display: inline-block;
+  font-size: inherit;
+  font-weight: bold;
+  padding: 7px 18px;
+  text-decoration: none;
+  background-clip: padding-box;
+
+  &:hover:not(:disabled){
+    $base-color-hover:    adjust-color($base-color, $saturation: 4%, $lightness: 5%);
+
+    @if $grayscale == true {
+      $base-color-hover: grayscale($base-color-hover);
+    }
+
+    background-color: $base-color-hover;
+    cursor: pointer;
+  }
+
+  &:active:not(:disabled),
+  &:focus:not(:disabled) {
+    $base-color-active: adjust-color($base-color, $saturation: -4%, $lightness: -5%);
+
+    @if $grayscale == true {
+      $base-color-active: grayscale($base-color-active);
+    }
+
+    background-color: $base-color-active;
+    cursor: pointer;
+  }
+}
+
+// Modern micro clearfix provides an easy way to contain floats without adding additional markup.
+//
+// Example usage:
+//
+//    // Contain all floats within .wrapper
+//    .wrapper {
+//      @include clearfix;
+//      .content,
+//      .sidebar {
+//        float : left;
+//      }
+//    }
+
+@mixin clearfix {
+  &:after {
+    content:"";
+    display:table;
+    clear:both;
+  }
+}
+
+// Acknowledgements
+// Beat *that* clearfix: [Thierry Koblentz](http://www.css-101.org/articles/clearfix/latest-new-clearfix-so-far.php)
+
+// directional-property mixins are shorthands
+// for writing properties like the following
+//
+// @include margin(null 0 10px);
+// ------
+// margin-right: 0;
+// margin-bottom: 10px;
+// margin-left: 0;
+//
+// - or -
+//
+// @include border-style(dotted null);
+// ------
+// border-top-style: dotted;
+// border-bottom-style: dotted;
+//
+// ------
+//
+// Note: You can also use false instead of null
+
+@function collapse-directionals($vals) {
+  $output: null;
+
+  $A: nth( $vals, 1 );
+  $B: if( length($vals) < 2, $A, nth($vals, 2));
+  $C: if( length($vals) < 3, $A, nth($vals, 3));
+  $D: if( length($vals) < 2, $A, nth($vals, if( length($vals) < 4, 2, 4) ));
+
+  @if $A == 0 { $A: 0 }
+  @if $B == 0 { $B: 0 }
+  @if $C == 0 { $C: 0 }
+  @if $D == 0 { $D: 0 }
+
+  @if $A == $B and $A == $C and $A == $D { $output: $A          }
+  @else if $A == $C and $B == $D         { $output: $A $B       }
+  @else if $B == $D                      { $output: $A $B $C    }
+  @else                                  { $output: $A $B $C $D }
+
+  @return $output;
+}
+
+@function contains-falsy($list) {
+  @each $item in $list {
+    @if not $item {
+      @return true;
+    }
+  }
+
+  @return false;
+}
+
+@mixin directional-property($pre, $suf, $vals) {
+  // Property Names
+  $top:    $pre + "-top"    + if($suf, "-#{$suf}", "");
+  $bottom: $pre + "-bottom" + if($suf, "-#{$suf}", "");
+  $left:   $pre + "-left"   + if($suf, "-#{$suf}", "");
+  $right:  $pre + "-right"  + if($suf, "-#{$suf}", "");
+  $all:    $pre +             if($suf, "-#{$suf}", "");
+
+  $vals: collapse-directionals($vals);
+
+  @if contains-falsy($vals) {
+    @if nth($vals, 1) { #{$top}: nth($vals, 1); }
+
+    @if length($vals) == 1 {
+      @if nth($vals, 1) { #{$right}: nth($vals, 1); }
+    } @else {
+      @if nth($vals, 2) { #{$right}: nth($vals, 2); }
+    }
+
+    // prop: top/bottom right/left
+    @if length($vals) == 2 {
+      @if nth($vals, 1) { #{$bottom}: nth($vals, 1); }
+      @if nth($vals, 2) { #{$left}:   nth($vals, 2); }
+
+    // prop: top right/left bottom
+    } @else if length($vals) == 3 {
+      @if nth($vals, 3) { #{$bottom}: nth($vals, 3); }
+      @if nth($vals, 2) { #{$left}:   nth($vals, 2); }
+
+    // prop: top right bottom left
+    } @else if length($vals) == 4 {
+      @if nth($vals, 3) { #{$bottom}: nth($vals, 3); }
+      @if nth($vals, 4) { #{$left}:   nth($vals, 4); }
+    }
+
+  // prop: top/right/bottom/left
+  } @else {
+    #{$all}: $vals;
+  }
+}
+
+@mixin margin($vals...) {
+  @include directional-property(margin, false, $vals...);
+}
+
+@mixin padding($vals...) {
+  @include directional-property(padding, false, $vals...);
+}
+
+@mixin border-style($vals...) {
+  @include directional-property(border, style, $vals...);
+}
+
+@mixin border-color($vals...) {
+  @include directional-property(border, color, $vals...);
+}
+
+@mixin border-width($vals...) {
+  @include directional-property(border, width, $vals...);
+}
+
+@mixin ellipsis($width: 100%) {
+  display: inline-block;
+  max-width: $width;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+$georgia: Georgia, Cambria, "Times New Roman", Times, serif;
+$helvetica: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
+$lucida-grande: "Lucida Grande", Tahoma, Verdana, Arial, sans-serif;
+$monospace: "Bitstream Vera Sans Mono", Consolas, Courier, monospace;
+$verdana: Verdana, Geneva, sans-serif;
+
+@mixin hide-text {
+  overflow: hidden;
+
+  &:before {
+    content: "";
+    display: block;
+    width: 0;
+    height: 100%;
+  }
+}
+
+//************************************************************************//
+// Generate a variable ($all-text-inputs) with a list of all html5
+// input types that have a text-based input, excluding textarea.
+// http://diveintohtml5.org/forms.html
+//************************************************************************//
+$inputs-list: 'input[type="email"]',
+              'input[type="number"]',
+              'input[type="password"]',
+              'input[type="search"]',
+              'input[type="tel"]',
+              'input[type="text"]',
+              'input[type="url"]',
+
+              // Webkit & Gecko may change the display of these in the future
+              'input[type="color"]',
+              'input[type="date"]',
+              'input[type="datetime"]',
+              'input[type="datetime-local"]',
+              'input[type="month"]',
+              'input[type="time"]',
+              'input[type="week"]';
+
+// Bare inputs
+//************************************************************************//
+$all-text-inputs: assign-inputs($inputs-list);
+
+// Hover Pseudo-class
+//************************************************************************//
+$all-text-inputs-hover: assign-inputs($inputs-list, hover);
+
+// Focus Pseudo-class
+//************************************************************************//
+$all-text-inputs-focus: assign-inputs($inputs-list, focus);
+
+
+
+// You must use interpolation on the variable:
+// #{$all-text-inputs}
+// #{$all-text-inputs-hover}
+// #{$all-text-inputs-focus}
+
+// Example
+//************************************************************************//
+//   #{$all-text-inputs}, textarea {
+//     border: 1px solid red;
+//   }
+
+
+
+//************************************************************************//
+// Generate a variable ($all-button-inputs) with a list of all html5
+// input types that have a button-based input, excluding button.
+//************************************************************************//
+$inputs-button-list: 'input[type="button"]',
+                     'input[type="reset"]',
+                     'input[type="submit"]';
+
+// Bare inputs
+//************************************************************************//
+$all-button-inputs: assign-inputs($inputs-button-list);
+
+// Hover Pseudo-class
+//************************************************************************//
+$all-button-inputs-hover: assign-inputs($inputs-button-list, hover);
+
+// Focus Pseudo-class
+//************************************************************************//
+$all-button-inputs-focus: assign-inputs($inputs-button-list, focus);
+
+// Active Pseudo-class
+//************************************************************************//
+$all-button-inputs-active: assign-inputs($inputs-button-list, active);
+
+
+
+// You must use interpolation on the variable:
+// #{$all-button-inputs}
+// #{$all-button-inputs-hover}
+// #{$all-button-inputs-focus}
+// #{$all-button-inputs-active}
+
+// Example
+//************************************************************************//
+//   #{$all-button-inputs}, button {
+//     border: 1px solid red;
+//   }
+
+@mixin position ($position: relative, $coordinates: null null null null) {
+
+  @if type-of($position) == list {
+    $coordinates: $position;
+    $position: relative;
+  }
+
+  $coordinates: unpack($coordinates);
+
+  $top: nth($coordinates, 1);
+  $right: nth($coordinates, 2);
+  $bottom: nth($coordinates, 3);
+  $left: nth($coordinates, 4);
+
+  position: $position;
+
+  @if ($top and $top == auto) or (type-of($top) == number) {
+    top: $top;
+  }
+
+  @if ($right and $right == auto) or (type-of($right) == number) {
+    right: $right;
+  }
+
+  @if ($bottom and $bottom == auto) or (type-of($bottom) == number) {
+    bottom: $bottom;
+  }
+
+  @if ($left and $left == auto) or (type-of($left) == number) {
+    left: $left;
+  }
+}
+
+//************************************************************************//
+// Example: @include prefixer(border-radius, $radii, webkit ms spec);
+//************************************************************************//
+// Variables located in /settings/_prefixer.scss
+
+@mixin prefixer ($property, $value, $prefixes) {
+  @each $prefix in $prefixes {
+    @if $prefix == webkit {
+      @if $prefix-for-webkit {
+        -webkit-#{$property}: $value;
+      }
+    }
+    @else if $prefix == moz {
+      @if $prefix-for-mozilla {
+        -moz-#{$property}: $value;
+      }
+    }
+    @else if $prefix == ms {
+      @if $prefix-for-microsoft {
+        -ms-#{$property}: $value;
+      }
+    }
+    @else if $prefix == o {
+      @if $prefix-for-opera {
+        -o-#{$property}: $value;
+      }
+    }
+    @else if $prefix == spec {
+      @if $prefix-for-spec {
+        #{$property}: $value;
+      }
+    }
+    @else  {
+      @warn "Unrecognized prefix: #{$prefix}";
+    }
+  }
+}
+
+@mixin disable-prefix-for-all() {
+  $prefix-for-webkit:    false !global;
+  $prefix-for-mozilla:   false !global;
+  $prefix-for-microsoft: false !global;
+  $prefix-for-opera:     false !global;
+  $prefix-for-spec:      false !global;
+}
+
+@mixin retina-image($filename, $background-size, $extension: png, $retina-filename: null, $retina-suffix: _2x, $asset-pipeline: $asset-pipeline) {
+  @if $asset-pipeline {
+    background-image: image-url("#{$filename}.#{$extension}");
+  }
+  @else {
+    background-image:       url("#{$filename}.#{$extension}");
+  }
+
+  @include hidpi {
+    @if $asset-pipeline {
+      @if $retina-filename {
+        background-image: image-url("#{$retina-filename}.#{$extension}");
+      }
+      @else {
+        background-image: image-url("#{$filename}#{$retina-suffix}.#{$extension}");
+      }
+    }
+
+    @else {
+      @if $retina-filename {
+        background-image: url("#{$retina-filename}.#{$extension}");
+      }
+      @else {
+        background-image: url("#{$filename}#{$retina-suffix}.#{$extension}");
+      }
+    }
+
+    background-size: $background-size;
+
+  }
+}
+
+@mixin size($size) {
+  $height: nth($size, 1);
+  $width: $height;
+
+  @if length($size) > 1 {
+    $height: nth($size, 2);
+  }
+
+  @if $height == auto or (type-of($height) == number and not unitless($height)) {
+    height: $height;
+  }
+
+  @if $width == auto or (type-of($width) == number and not unitless($width)) {
+    width: $width;
+  }
+}
+
+// CSS cubic-bezier timing functions. Timing functions courtesy of jquery.easie (github.com/jaukia/easie)
+// Timing functions are the same as demo'ed here: http://jqueryui.com/resources/demos/effect/easing.html
+
+// EASE IN
+$ease-in-quad:      cubic-bezier(0.550,  0.085, 0.680, 0.530);
+$ease-in-cubic:     cubic-bezier(0.550,  0.055, 0.675, 0.190);
+$ease-in-quart:     cubic-bezier(0.895,  0.030, 0.685, 0.220);
+$ease-in-quint:     cubic-bezier(0.755,  0.050, 0.855, 0.060);
+$ease-in-sine:      cubic-bezier(0.470,  0.000, 0.745, 0.715);
+$ease-in-expo:      cubic-bezier(0.950,  0.050, 0.795, 0.035);
+$ease-in-circ:      cubic-bezier(0.600,  0.040, 0.980, 0.335);
+$ease-in-back:      cubic-bezier(0.600, -0.280, 0.735, 0.045);
+
+// EASE OUT
+$ease-out-quad:     cubic-bezier(0.250,  0.460, 0.450, 0.940);
+$ease-out-cubic:    cubic-bezier(0.215,  0.610, 0.355, 1.000);
+$ease-out-quart:    cubic-bezier(0.165,  0.840, 0.440, 1.000);
+$ease-out-quint:    cubic-bezier(0.230,  1.000, 0.320, 1.000);
+$ease-out-sine:     cubic-bezier(0.390,  0.575, 0.565, 1.000);
+$ease-out-expo:     cubic-bezier(0.190,  1.000, 0.220, 1.000);
+$ease-out-circ:     cubic-bezier(0.075,  0.820, 0.165, 1.000);
+$ease-out-back:     cubic-bezier(0.175,  0.885, 0.320, 1.275);
+
+// EASE IN OUT
+$ease-in-out-quad:  cubic-bezier(0.455,  0.030, 0.515, 0.955);
+$ease-in-out-cubic: cubic-bezier(0.645,  0.045, 0.355, 1.000);
+$ease-in-out-quart: cubic-bezier(0.770,  0.000, 0.175, 1.000);
+$ease-in-out-quint: cubic-bezier(0.860,  0.000, 0.070, 1.000);
+$ease-in-out-sine:  cubic-bezier(0.445,  0.050, 0.550, 0.950);
+$ease-in-out-expo:  cubic-bezier(1.000,  0.000, 0.000, 1.000);
+$ease-in-out-circ:  cubic-bezier(0.785,  0.135, 0.150, 0.860);
+$ease-in-out-back:  cubic-bezier(0.680, -0.550, 0.265, 1.550);
+
+@mixin triangle ($size, $color, $direction) {
+  height: 0;
+  width: 0;
+
+  $width: nth($size, 1);
+  $height: nth($size, length($size));
+
+  $foreground-color: nth($color, 1);
+  $background-color: if(length($color) == 2, nth($color, 2), transparent);
+
+  @if ($direction == up) or ($direction == down) or ($direction == right) or ($direction == left) {
+
+    $width: $width / 2;
+    $height: if(length($size) > 1, $height, $height/2);
+
+    @if $direction == up {
+      border-left: $width solid $background-color;
+      border-right: $width solid $background-color;
+      border-bottom: $height solid $foreground-color;
+
+    } @else if $direction == right {
+      border-top: $width solid $background-color;
+      border-bottom: $width solid $background-color;
+      border-left: $height solid $foreground-color;
+
+    } @else if $direction == down {
+      border-left: $width solid $background-color;
+      border-right: $width solid $background-color;
+      border-top: $height solid $foreground-color;
+
+    } @else if $direction == left {
+      border-top: $width solid $background-color;
+      border-bottom: $width solid $background-color;
+      border-right: $height solid $foreground-color;
+    }
+  }
+
+  @else if ($direction == up-right) or ($direction == up-left) {
+    border-top: $height solid $foreground-color;
+
+    @if $direction == up-right {
+      border-left:  $width solid $background-color;
+
+    } @else if $direction == up-left {
+      border-right: $width solid $background-color;
+    }
+  }
+
+  @else if ($direction == down-right) or ($direction == down-left) {
+    border-bottom: $height solid $foreground-color;
+
+    @if $direction == down-right {
+      border-left:  $width solid $background-color;
+
+    } @else if $direction == down-left {
+      border-right: $width solid $background-color;
+    }
+  }
+
+  @else if ($direction == inset-up) {
+    border-width: $height $width;
+    border-style: solid;
+    border-color: $background-color $background-color $foreground-color;
+  }
+
+  @else if ($direction == inset-down) {
+    border-width: $height $width;
+    border-style: solid;
+    border-color: $foreground-color $background-color $background-color;
+  }
+
+  @else if ($direction == inset-right) {
+    border-width: $width $height;
+    border-style: solid;
+    border-color: $background-color $background-color $background-color $foreground-color;
+  }
+
+  @else if ($direction == inset-left) {
+    border-width: $width $height;
+    border-style: solid;
+    border-color: $background-color $foreground-color $background-color $background-color;
+  }
+}
+
+@mixin word-wrap($wrap: break-word) {
+  word-wrap: $wrap;
+
+  @if $wrap == break-word {
+    overflow-wrap: break-word;
+    word-break: break-all;
+  }
+}
+
+
+/* ================================================================= 
+End Bourbon
+===================================================================*/
+
+
+// http://www.w3.org/TR/css3-animations/#the-animation-name-property-
+// Each of these mixins support comma separated lists of values, which allows different transitions for individual properties to be described in a single style rule. Each value in the list corresponds to the value at that same position in the other properties.
+
+// Official animation shorthand property.
+@mixin animation ($animations...) {
+  @include prefixer(animation, $animations, webkit moz spec);
+}
+
+// Individual Animation Properties
+@mixin animation-name ($names...) {
+  @include prefixer(animation-name, $names, webkit moz spec);
+}
+
+
+@mixin animation-duration ($times...) {
+  @include prefixer(animation-duration, $times, webkit moz spec);
+}
+
+
+@mixin animation-timing-function ($motions...) {
+// ease | linear | ease-in | ease-out | ease-in-out
+  @include prefixer(animation-timing-function, $motions, webkit moz spec);
+}
+
+
+@mixin animation-iteration-count ($values...) {
+// infinite | <number>
+  @include prefixer(animation-iteration-count, $values, webkit moz spec);
+}
+
+
+@mixin animation-direction ($directions...) {
+// normal | alternate
+  @include prefixer(animation-direction, $directions, webkit moz spec);
+}
+
+
+@mixin animation-play-state ($states...) {
+// running | paused
+  @include prefixer(animation-play-state, $states, webkit moz spec);
+}
+
+
+@mixin animation-delay ($times...) {
+  @include prefixer(animation-delay, $times, webkit moz spec);
+}
+
+
+@mixin animation-fill-mode ($modes...) {
+// none | forwards | backwards | both
+  @include prefixer(animation-fill-mode, $modes, webkit moz spec);
+}
+
+@mixin appearance ($value) {
+  @include prefixer(appearance, $value, webkit moz ms o spec);
+}
+
+//************************************************************************//
+// Backface-visibility mixin
+//************************************************************************//
+@mixin backface-visibility($visibility) {
+  @include prefixer(backface-visibility, $visibility, webkit spec);
+}
+
+//************************************************************************//
+// Background-image property for adding multiple background images with
+// gradients, or for stringing multiple gradients together.
+//************************************************************************//
+
+@mixin background-image($images...) {
+  $webkit-images: ();
+  $spec-images: ();
+
+  @each $image in $images {
+    $webkit-image: ();
+    $spec-image: ();
+
+    @if (type-of($image) == string) {
+      $url-str:       str-slice($image, 0, 3);
+      $gradient-type: str-slice($image, 0, 6);
+
+      @if $url-str == "url" {
+        $webkit-image: $image;
+          $spec-image: $image;
+      }
+
+      @else if $gradient-type == "linear" {
+        $gradients: _linear-gradient-parser($image);
+        $webkit-image:  map-get($gradients, webkit-image);
+        $spec-image:    map-get($gradients, spec-image);
+      }
+
+      @else if $gradient-type == "radial" {
+        $gradients: _radial-gradient-parser($image);
+        $webkit-image: map-get($gradients, webkit-image);
+        $spec-image:   map-get($gradients, spec-image);
+      }
+    }
+
+    $webkit-images: append($webkit-images, $webkit-image, comma);
+    $spec-images:   append($spec-images,   $spec-image,   comma);
+  }
+
+  background-image: $webkit-images;
+  background-image: $spec-images;
+}
+
+//************************************************************************//
+// Background property for adding multiple backgrounds using shorthand
+// notation.
+//************************************************************************//
+
+@mixin background($backgrounds...) {
+  $webkit-backgrounds: ();
+  $spec-backgrounds: ();
+
+  @each $background in $backgrounds {
+    $webkit-background: ();
+    $spec-background: ();
+    $background-type: type-of($background);
+
+    @if $background-type == string or list {
+      $background-str: if($background-type == list, nth($background, 1), $background);
+
+      $url-str:       str-slice($background-str, 0, 3);
+      $gradient-type: str-slice($background-str, 0, 6);
+
+      @if $url-str == "url" {
+        $webkit-background: $background;
+          $spec-background: $background;
+      }
+
+      @else if $gradient-type == "linear" {
+        $gradients: _linear-gradient-parser("#{$background}");
+        $webkit-background: map-get($gradients, webkit-image);
+        $spec-background:   map-get($gradients, spec-image);
+      }
+
+      @else if $gradient-type == "radial" {
+        $gradients: _radial-gradient-parser("#{$background}");
+        $webkit-background: map-get($gradients, webkit-image);
+        $spec-background:   map-get($gradients, spec-image);
+      }
+
+      @else {
+        $webkit-background: $background;
+          $spec-background: $background;
+      }
+    }
+
+    @else {
+      $webkit-background: $background;
+        $spec-background: $background;
+    }
+
+    $webkit-backgrounds: append($webkit-backgrounds, $webkit-background, comma);
+    $spec-backgrounds:   append($spec-backgrounds,   $spec-background,   comma);
+  }
+
+  background: $webkit-backgrounds;
+  background: $spec-backgrounds;
+}
+
+@mixin border-image($borders...) {
+  $webkit-borders: ();
+  $spec-borders: ();
+
+  @each $border in $borders {
+    $webkit-border: ();
+    $spec-border: ();
+    $border-type: type-of($border);
+
+    @if $border-type == string or list {
+      $border-str: if($border-type == list, nth($border, 1), $border);
+
+      $url-str:       str-slice($border-str, 0, 3);
+      $gradient-type: str-slice($border-str, 0, 6);
+
+      @if $url-str == "url" {
+        $webkit-border: $border;
+          $spec-border: $border;
+      }
+
+      @else if $gradient-type == "linear" {
+        $gradients: _linear-gradient-parser("#{$border}");
+        $webkit-border: map-get($gradients, webkit-image);
+        $spec-border:   map-get($gradients, spec-image);
+      }
+
+      @else if $gradient-type == "radial" {
+        $gradients: _radial-gradient-parser("#{$border}");
+        $webkit-border: map-get($gradients, webkit-image);
+        $spec-border:   map-get($gradients, spec-image);
+      }
+
+      @else {
+        $webkit-border: $border;
+          $spec-border: $border;
+      }
+    }
+
+    @else {
+      $webkit-border: $border;
+        $spec-border: $border;
+    }
+
+    $webkit-borders: append($webkit-borders, $webkit-border, comma);
+    $spec-borders:   append($spec-borders,   $spec-border,   comma);
+  }
+
+  -webkit-border-image: $webkit-borders;
+          border-image: $spec-borders;
+          border-style: solid;
+}
+
+//Examples:
+// @include border-image(url("image.png"));
+// @include border-image(url("image.png") 20 stretch);
+// @include border-image(linear-gradient(45deg, orange, yellow));
+// @include border-image(linear-gradient(45deg, orange, yellow) stretch);
+// @include border-image(linear-gradient(45deg, orange, yellow) 20 30 40 50 stretch round);
+// @include border-image(radial-gradient(top, cover, orange, yellow, orange));
+
+//************************************************************************//
+// Shorthand Border-radius mixins
+//************************************************************************//
+@mixin border-top-radius($radii) {
+  @include prefixer(border-top-left-radius, $radii, spec);
+  @include prefixer(border-top-right-radius, $radii, spec);
+}
+
+@mixin border-bottom-radius($radii) {
+  @include prefixer(border-bottom-left-radius, $radii, spec);
+  @include prefixer(border-bottom-right-radius, $radii, spec);
+}
+
+@mixin border-left-radius($radii) {
+  @include prefixer(border-top-left-radius, $radii, spec);
+  @include prefixer(border-bottom-left-radius, $radii, spec);
+}
+
+@mixin border-right-radius($radii) {
+  @include prefixer(border-top-right-radius, $radii, spec);
+  @include prefixer(border-bottom-right-radius, $radii, spec);
+}
+
+@mixin box-sizing ($box) {
+//  content-box | border-box | inherit
+  @include prefixer(box-sizing, $box, webkit moz spec);
+}
+
+@mixin calc($property, $value) {
+  #{$property}: -webkit-calc(#{$value});
+  #{$property}:         calc(#{$value});
+}
+
+@mixin columns($arg: auto) {
+// <column-count> || <column-width>
+  @include prefixer(columns, $arg, webkit moz spec);
+}
+
+@mixin column-count($int: auto) {
+// auto || integer
+  @include prefixer(column-count, $int, webkit moz spec);
+}
+
+@mixin column-gap($length: normal) {
+// normal || length
+  @include prefixer(column-gap, $length, webkit moz spec);
+}
+
+@mixin column-fill($arg: auto) {
+// auto || length
+  @include prefixer(column-fill, $arg, webkit moz spec);
+}
+
+@mixin column-rule($arg) {
+// <border-width> || <border-style> || <color>
+  @include prefixer(column-rule, $arg, webkit moz spec);
+}
+
+@mixin column-rule-color($color) {
+  @include prefixer(column-rule-color, $color, webkit moz spec);
+}
+
+@mixin column-rule-style($style: none) {
+// none | hidden | dashed | dotted | double | groove | inset | inset | outset | ridge | solid
+  @include prefixer(column-rule-style, $style, webkit moz spec);
+}
+
+@mixin column-rule-width ($width: none) {
+  @include prefixer(column-rule-width, $width, webkit moz spec);
+}
+
+@mixin column-span($arg: none) {
+// none || all
+  @include prefixer(column-span, $arg, webkit moz spec);
+}
+
+@mixin column-width($length: auto) {
+// auto || length
+  @include prefixer(column-width, $length, webkit moz spec);
+}
+
+@mixin filter($function: none) {
+  // <filter-function> [<filter-function]* | none
+  @include prefixer(filter, $function, webkit spec);
+}
+
+
+// CSS3 Flexible Box Model and property defaults
+
+// Custom shorthand notation for flexbox
+@mixin box($orient: inline-axis, $pack: start, $align: stretch) {
+  @include display-box;
+  @include box-orient($orient);
+  @include box-pack($pack);
+  @include box-align($align);
+}
+
+@mixin display-box {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox; // IE 10
+  display: box;
+}
+
+@mixin box-orient($orient: inline-axis) {
+// horizontal|vertical|inline-axis|block-axis|inherit
+  @include prefixer(box-orient, $orient, webkit moz spec);
+}
+
+@mixin box-pack($pack: start) {
+// start|end|center|justify
+  @include prefixer(box-pack, $pack, webkit moz spec);
+  -ms-flex-pack: $pack; // IE 10
+}
+
+@mixin box-align($align: stretch) {
+// start|end|center|baseline|stretch
+  @include prefixer(box-align, $align, webkit moz spec);
+  -ms-flex-align: $align; // IE 10
+}
+
+@mixin box-direction($direction: normal) {
+// normal|reverse|inherit
+  @include prefixer(box-direction, $direction, webkit moz spec);
+  -ms-flex-direction: $direction; // IE 10
+}
+
+@mixin box-lines($lines: single) {
+// single|multiple
+  @include prefixer(box-lines, $lines, webkit moz spec);
+}
+
+@mixin box-ordinal-group($int: 1) {
+  @include prefixer(box-ordinal-group, $int, webkit moz spec);
+  -ms-flex-order: $int; // IE 10
+}
+
+@mixin box-flex($value: 0.0) {
+  @include prefixer(box-flex, $value, webkit moz spec);
+  -ms-flex: $value; // IE 10
+}
+
+@mixin box-flex-group($int: 1) {
+  @include prefixer(box-flex-group, $int, webkit moz spec);
+}
+
+// CSS3 Flexible Box Model and property defaults
+// Unified attributes for 2009, 2011, and 2012 flavours.
+
+// 2009 - display (box | inline-box)
+// 2011 - display (flexbox | inline-flexbox)
+// 2012 - display (flex | inline-flex)
+@mixin display($value) {
+//  flex | inline-flex
+    @if $value == "flex" {
+        // 2009
+        display: -webkit-box;
+        display: -moz-box;
+        display: box;
+
+        // 2012
+        display: -webkit-flex;
+        display: -moz-flex;
+        display: -ms-flexbox; // 2011 (IE 10)
+        display: flex;
+    }
+
+    @elseif $value == "inline-flex" {
+        display: -webkit-inline-box;
+        display: -moz-inline-box;
+        display: inline-box;
+
+        display: -webkit-inline-flex;
+        display: -moz-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+    }
+
+    @else {
+        display: $value;
+    }
+}
+
+// 2009 - box-flex (integer)
+// 2011 - flex (decimal | width decimal)
+// 2012 - flex (integer integer width)
+@mixin flex($value) {
+
+    // Grab flex-grow for older browsers.
+    $flex-grow: nth($value, 1);
+
+    // 2009
+    @include prefixer(box-flex, $flex-grow, webkit moz spec);
+
+    // 2011 (IE 10), 2012
+    @include prefixer(flex, $value, webkit moz ms spec);
+}
+
+// 2009 - box-orient ( horizontal | vertical | inline-axis | block-axis)
+//      - box-direction (normal | reverse)      
+// 2011 - flex-direction (row | row-reverse | column | column-reverse)
+// 2012 - flex-direction (row | row-reverse | column | column-reverse)
+@mixin flex-direction($value: row) {
+
+    // Alt values.
+    $value-2009: $value;
+    $value-2011: $value;
+    $direction: "normal";
+
+    @if $value == row {
+        $value-2009: horizontal;
+    }
+
+    @elseif $value == "row-reverse" {
+        $value-2009: horizontal;
+        $direction: reverse;
+    }
+
+    @elseif $value == column {
+        $value-2009: vertical;
+    }
+
+    @elseif $value == "column-reverse" {
+        $value-2009: vertical;
+        $direction: reverse;
+    }
+
+    // 2009
+    @include prefixer(box-orient, $value-2009, webkit moz spec);
+    @if $direction == "reverse" {
+        @include prefixer(box-direction, $direction, webkit moz spec);
+    }
+
+    // 2012
+    @include prefixer(flex-direction, $value, webkit moz spec);
+
+    // 2011 (IE 10)
+    -ms-flex-direction: $value;
+}
+
+// 2009 - box-lines (single | multiple)
+// 2011 - flex-wrap (nowrap | wrap | wrap-reverse)
+// 2012 - flex-wrap (nowrap | wrap | wrap-reverse)
+@mixin flex-wrap($value: nowrap) {
+
+    // Alt values.
+    $alt-value: $value;
+    @if $value == nowrap {
+        $alt-value: single;
+    }
+
+    @elseif $value == wrap {
+        $alt-value: multiple;
+    }
+
+    @elseif $value == "wrap-reverse" {
+        $alt-value: multiple;
+    }
+
+    @include prefixer(box-lines, $alt-value, webkit moz spec);
+    @include prefixer(flex-wrap, $value, webkit moz ms spec);
+}
+
+// 2009 - TODO: parse values into flex-direction/flex-wrap
+// 2011 - TODO: parse values into flex-direction/flex-wrap
+// 2012 - flex-flow (flex-direction || flex-wrap)
+@mixin flex-flow($value) {
+    @include prefixer(flex-flow, $value, webkit moz spec);
+}
+
+// 2009 - box-ordinal-group (integer)
+// 2011 - flex-order (integer)
+// 2012 - order (integer)
+@mixin order($int: 0) {
+    // 2009
+    @include prefixer(box-ordinal-group, $int, webkit moz spec);
+
+    // 2012
+    @include prefixer(order, $int, webkit moz spec);
+
+    // 2011 (IE 10)
+    -ms-flex-order: $int;
+}
+
+// 2012 - flex-grow (number)
+@mixin flex-grow($number: 0) {
+    @include prefixer(flex-grow, $number, webkit moz spec);
+    -ms-flex-positive: $number;
+}
+
+// 2012 - flex-shrink (number)
+@mixin flex-shrink($number: 1) {
+    @include prefixer(flex-shrink, $number, webkit moz spec);
+    -ms-flex-negative: $number;
+}
+
+// 2012 - flex-basis (number)
+@mixin flex-basis($width: auto) {
+    @include prefixer(flex-basis, $width, webkit moz spec);
+    -ms-flex-preferred-size: $width;
+}
+
+// 2009 - box-pack (start | end | center | justify)
+// 2011 - flex-pack (start | end | center | justify)
+// 2012 - justify-content (flex-start | flex-end | center | space-between | space-around)
+@mixin justify-content ($value: flex-start) {
+
+    // Alt values.
+    $alt-value: $value;
+    @if $value == "flex-start" {
+        $alt-value: start;
+    }
+
+    @elseif $value == "flex-end" {
+        $alt-value: end;
+    }
+
+    @elseif $value == "space-between" {
+        $alt-value: justify;
+    }
+
+    @elseif $value == "space-around" {
+        $alt-value: center;
+    }
+
+    // 2009
+    @include prefixer(box-pack, $alt-value, webkit moz spec);
+
+    // 2012
+    @include prefixer(justify-content, $value, webkit moz ms o spec);
+
+    // 2011 (IE 10)
+    -ms-flex-pack: $alt-value;
+}
+
+// 2009 - box-align (start | end | center | baseline | stretch)
+// 2011 - flex-align (start | end | center | baseline | stretch)
+// 2012 - align-items (flex-start | flex-end | center | baseline | stretch)
+@mixin align-items($value: stretch) {
+
+    $alt-value: $value;
+
+    @if $value == "flex-start" {
+        $alt-value: start;
+    }    
+
+    @elseif $value == "flex-end" {
+        $alt-value: end;
+    }
+
+    // 2009
+    @include prefixer(box-align, $alt-value, webkit moz spec);
+
+    // 2012
+    @include prefixer(align-items, $value, webkit moz ms o spec);
+    
+    // 2011 (IE 10)
+    -ms-flex-align: $alt-value;    
+}
+
+// 2011 - flex-item-align (auto | start | end | center | baseline | stretch)
+// 2012 - align-self (auto | flex-start | flex-end | center | baseline | stretch)
+@mixin align-self($value: auto) {
+
+    $value-2011: $value;
+    @if $value == "flex-start" {
+        $value-2011: start;
+    }    
+
+    @elseif $value == "flex-end" {
+        $value-2011: end;
+    }
+
+    // 2012
+    @include prefixer(align-self, $value, webkit moz spec);
+
+    // 2011 (IE 10)
+    -ms-flex-item-align: $value-2011;
+}
+
+// 2011 - flex-line-pack (start | end | center | justify | distribute | stretch)
+// 2012 - align-content (flex-start | flex-end | center | space-between | space-around | stretch)
+@mixin align-content($value: stretch) {
+
+    $value-2011: $value;
+    @if $value == "flex-start" {
+        $value-2011: start;
+    }    
+
+    @elseif $value == "flex-end" {
+        $value-2011: end;
+    }
+
+    @elseif $value == "space-between" {
+        $value-2011: justify;
+    }
+
+    @elseif $value == "space-around" {
+        $value-2011: distribute;
+    }
+
+    // 2012
+    @include prefixer(align-content, $value, webkit moz spec);
+
+    // 2011 (IE 10)
+    -ms-flex-line-pack: $value-2011;
+}
+
+
+// Order of the includes matters, and it is: normal, bold, italic, bold+italic.
+
+@mixin font-face($font-family, $file-path, $weight: normal, $style: normal, $asset-pipeline: $asset-pipeline) {
+  @font-face {
+    font-family: $font-family;
+    font-weight: $weight;
+    font-style: $style;
+
+    @if $asset-pipeline == true {
+      src: font-url('#{$file-path}.eot');
+      src: font-url('#{$file-path}.eot?#iefix')          format('embedded-opentype'),
+           font-url('#{$file-path}.woff')                format('woff'),
+           font-url('#{$file-path}.ttf')                 format('truetype'),
+           font-url('#{$file-path}.svg##{$font-family}') format('svg');
+    } @else {
+      src: url('#{$file-path}.eot');
+      src: url('#{$file-path}.eot?#iefix')               format('embedded-opentype'),
+           url('#{$file-path}.woff')                     format('woff'),
+           url('#{$file-path}.ttf')                      format('truetype'),
+           url('#{$file-path}.svg##{$font-family}')      format('svg');
+    }
+  }
+}
+
+// Font feature settings mixin and property default.
+// Examples: @include font-feature-settings("liga");
+//           @include font-feature-settings("lnum" false);
+//           @include font-feature-settings("pnum" 1, "kern" 0);
+//           @include font-feature-settings("ss01", "ss02");
+
+@mixin font-feature-settings($settings...) {
+  @if length($settings) == 0 { $settings: none; }
+  @include prefixer(font-feature-settings, $settings, webkit moz ms spec);
+}
+// HiDPI mixin. Default value set to 1.3 to target Google Nexus 7 (http://bjango.com/articles/min-device-pixel-ratio/)
+@mixin hidpi($ratio: 1.3) {
+  @media only screen and (-webkit-min-device-pixel-ratio: $ratio),
+  only screen and (min--moz-device-pixel-ratio: $ratio),
+  only screen and (-o-min-device-pixel-ratio: #{$ratio}/1),
+  only screen and (min-resolution: #{round($ratio*96)}dpi),
+  only screen and (min-resolution: #{$ratio}dppx) {
+    @content;
+  }
+}
+
+@mixin hyphens($hyphenation: none) {
+// none | manual | auto
+  @include prefixer(hyphens, $hyphenation, webkit moz ms spec);
+}
+@mixin image-rendering ($mode:auto) {
+
+  @if ($mode == crisp-edges) {
+      -ms-interpolation-mode: nearest-neighbor; // IE8+
+      image-rendering: -moz-crisp-edges;
+      image-rendering: -o-crisp-edges;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+  }
+
+  @else {
+      image-rendering: $mode;
+  }
+}
+
+// Adds keyframes blocks for supported prefixes, removing redundant prefixes in the block's content
+@mixin keyframes($name) {
+  $original-prefix-for-webkit:    $prefix-for-webkit;
+  $original-prefix-for-mozilla:   $prefix-for-mozilla;
+  $original-prefix-for-microsoft: $prefix-for-microsoft;
+  $original-prefix-for-opera:     $prefix-for-opera;
+  $original-prefix-for-spec:      $prefix-for-spec;
+
+  @if $original-prefix-for-webkit {
+    @include disable-prefix-for-all();
+    $prefix-for-webkit: true !global;
+    @-webkit-keyframes #{$name} {
+      @content;
+    }
+  }
+  @if $original-prefix-for-mozilla {
+    @include disable-prefix-for-all();
+    $prefix-for-mozilla: true !global;
+    @-moz-keyframes #{$name} {
+      @content;
+    }
+  }
+
+  $prefix-for-webkit:    $original-prefix-for-webkit    !global;
+  $prefix-for-mozilla:   $original-prefix-for-mozilla   !global;
+  $prefix-for-microsoft: $original-prefix-for-microsoft !global;
+  $prefix-for-opera:     $original-prefix-for-opera     !global;
+  $prefix-for-spec:      $original-prefix-for-spec      !global;
+
+  @if $original-prefix-for-spec {
+    @keyframes #{$name} {
+      @content;
+    }
+  }
+}
+
+@mixin linear-gradient($pos, $G1, $G2: null,
+                       $G3: null, $G4: null,
+                       $G5: null, $G6: null,
+                       $G7: null, $G8: null,
+                       $G9: null, $G10: null,
+                       $fallback: null) {
+  // Detect what type of value exists in $pos
+  $pos-type: type-of(nth($pos, 1));
+  $pos-spec: null;
+  $pos-degree: null;
+
+  // If $pos is missing from mixin, reassign vars and add default position
+  @if ($pos-type == color) or (nth($pos, 1) == "transparent")  {
+    $G10: $G9; $G9: $G8; $G8: $G7; $G7: $G6; $G6: $G5;
+     $G5: $G4; $G4: $G3; $G3: $G2; $G2: $G1; $G1: $pos;
+     $pos: null;
+  }
+
+  @if $pos {
+    $positions: _linear-positions-parser($pos);
+    $pos-degree: nth($positions, 1);
+    $pos-spec:   nth($positions, 2);
+  }
+
+  $full: $G1, $G2, $G3, $G4, $G5, $G6, $G7, $G8, $G9, $G10;
+
+  // Set $G1 as the default fallback color
+  $fallback-color: nth($G1, 1);
+
+  // If $fallback is a color use that color as the fallback color
+  @if (type-of($fallback) == color) or ($fallback == "transparent") {
+    $fallback-color: $fallback;
+  }
+
+  background-color: $fallback-color;
+  background-image: -webkit-linear-gradient($pos-degree $full); // Safari 5.1+, Chrome
+  background-image: unquote("linear-gradient(#{$pos-spec}#{$full})");
+}
+
+@mixin perspective($depth: none) {
+  // none | <length>
+  @include prefixer(perspective, $depth, webkit moz spec);
+}
+
+@mixin perspective-origin($value: 50% 50%) {
+  @include prefixer(perspective-origin, $value, webkit moz spec);
+}
+
+@mixin placeholder {
+  $placeholders: ":-webkit-input" ":-moz" "-moz" "-ms-input";
+  @each $placeholder in $placeholders {
+    &:#{$placeholder}-placeholder {
+      @content;
+    }
+  }
+}
+
+// Requires Sass 3.1+
+@mixin radial-gradient($G1,        $G2,
+                       $G3: null, $G4: null,
+                       $G5: null, $G6: null,
+                       $G7: null, $G8: null,
+                       $G9: null, $G10: null,
+                       $pos: null,
+                       $shape-size: null,
+                       $fallback: null) {
+
+  $data: _radial-arg-parser($G1, $G2, $pos, $shape-size);
+  $G1:  nth($data, 1);
+  $G2:  nth($data, 2);
+  $pos: nth($data, 3);
+  $shape-size: nth($data, 4);
+
+  $full: $G1, $G2, $G3, $G4, $G5, $G6, $G7, $G8, $G9, $G10;
+
+  // Strip deprecated cover/contain for spec
+  $shape-size-spec: _shape-size-stripper($shape-size);
+
+  // Set $G1 as the default fallback color
+  $first-color: nth($full, 1);
+  $fallback-color: nth($first-color, 1);
+
+  @if (type-of($fallback) == color) or ($fallback == "transparent") {
+    $fallback-color: $fallback;
+  }
+
+  // Add Commas and spaces
+  $shape-size: if($shape-size, '#{$shape-size}, ', null);
+  $pos:        if($pos, '#{$pos}, ', null);
+  $pos-spec:   if($pos, 'at #{$pos}', null);
+  $shape-size-spec: if(($shape-size-spec != ' ') and ($pos == null), '#{$shape-size-spec}, ', '#{$shape-size-spec} ');
+
+  background-color:  $fallback-color;
+  background-image: -webkit-radial-gradient(unquote(#{$pos}#{$shape-size}#{$full}));
+  background-image: unquote("radial-gradient(#{$shape-size-spec}#{$pos-spec}#{$full})");
+}
+
+@mixin transform($property: none) {
+//  none | <transform-function>
+  @include prefixer(transform, $property, webkit moz ms o spec);
+}
+
+@mixin transform-origin($axes: 50%) {
+// x-axis - left | center | right  | length | %
+// y-axis - top  | center | bottom | length | %
+// z-axis -                          length
+  @include prefixer(transform-origin, $axes, webkit moz ms o spec);
+}
+
+@mixin transform-style ($style: flat) {
+  @include prefixer(transform-style, $style, webkit moz ms o spec);
+}
+
+// Shorthand mixin. Supports multiple parentheses-deliminated values for each variable.
+// Example: @include transition (all 2s ease-in-out);
+//          @include transition (opacity 1s ease-in 2s, width 2s ease-out);
+//          @include transition-property (transform, opacity);
+
+@mixin transition ($properties...) {
+  // Fix for vendor-prefix transform property
+  $needs-prefixes: false;
+  $webkit: ();
+  $moz: ();
+  $spec: ();
+
+  // Create lists for vendor-prefixed transform
+  @each $list in $properties {
+    @if nth($list, 1) == "transform" {
+      $needs-prefixes: true;
+      $list1: -webkit-transform;
+      $list2: -moz-transform;
+      $list3: ();
+
+      @each $var in $list {
+        $list3: join($list3, $var);
+
+        @if $var != "transform" {
+          $list1: join($list1, $var);
+          $list2: join($list2, $var);
+        }
+      }
+
+      $webkit: append($webkit, $list1);
+         $moz: append($moz,    $list2);
+        $spec: append($spec,   $list3);
+    }
+
+    // Create lists for non-prefixed transition properties
+    @else {
+      $webkit:  append($webkit, $list, comma);
+      $moz:     append($moz,    $list, comma);
+      $spec:    append($spec,   $list, comma);
+    }
+  }
+
+  @if $needs-prefixes {
+    -webkit-transition: $webkit;
+       -moz-transition: $moz;
+            transition: $spec;
+  }
+  @else {
+    @if length($properties) >= 1 {
+      @include prefixer(transition, $properties, webkit moz spec);
+    }
+
+    @else {
+      $properties: all 0.15s ease-out 0s;
+      @include prefixer(transition, $properties, webkit moz spec);
+    }
+  }
+}
+
+@mixin transition-property ($properties...) {
+   -webkit-transition-property: transition-property-names($properties, 'webkit');
+      -moz-transition-property: transition-property-names($properties, 'moz');
+           transition-property: transition-property-names($properties, false);
+}
+
+@mixin transition-duration ($times...) {
+  @include prefixer(transition-duration, $times, webkit moz spec);
+}
+
+@mixin transition-timing-function ($motions...) {
+// ease | linear | ease-in | ease-out | ease-in-out | cubic-bezier()
+  @include prefixer(transition-timing-function, $motions, webkit moz spec);
+}
+
+@mixin transition-delay ($times...) {
+  @include prefixer(transition-delay, $times, webkit moz spec);
+}
+
+@mixin user-select($arg: none) {
+  @include prefixer(user-select, $arg, webkit moz ms spec);
+}
+
+//************************************************************************//
+// Helper function for str-to-num fn.
+// Source: http://sassmeister.com/gist/9647408
+//************************************************************************//
+@function _convert-units($number, $unit) {
+  $strings: 'px' 'cm' 'mm' '%' 'ch' 'pica' 'in' 'em' 'rem' 'pt' 'pc' 'ex' 'vw' 'vh' 'vmin' 'vmax', 'deg', 'rad', 'grad', 'turn';
+  $units:   1px  1cm  1mm  1%  1ch  1pica  1in  1em  1rem  1pt  1pc  1ex  1vw  1vh  1vmin  1vmax,  1deg,  1rad,  1grad, 1turn;
+  $index: index($strings, $unit);
+
+  @if not $index {
+    @warn "Unknown unit `#{$unit}`.";
+    @return false;
+  }
+  @return $number * nth($units, $index);
+}
+
+@function _gradient-positions-parser($gradient-type, $gradient-positions) {
+  @if $gradient-positions
+  and ($gradient-type == linear)
+  and (type-of($gradient-positions) != color) {
+    $gradient-positions: _linear-positions-parser($gradient-positions);
+  }
+  @else if $gradient-positions
+  and ($gradient-type == radial)
+  and (type-of($gradient-positions) != color) {
+    $gradient-positions: _radial-positions-parser($gradient-positions);
+  }
+  @return $gradient-positions;
+}
+
+//************************************************************************//
+// Helper for linear-gradient-parser
+//************************************************************************//
+@function _is-num($char) {
+  $values: '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' 0 1 2 3 4 5 6 7 8 9;
+  $index: index($values, $char);
+  @return if($index, true, false);
+}
+
+// Private function for linear-gradient-parser
+@function _linear-angle-parser($image, $first-val, $prefix, $suffix) {
+  $offset: null;
+  $unit-short:  str-slice($first-val, str-length($first-val) - 2, str-length($first-val));
+  $unit-long:   str-slice($first-val, str-length($first-val) - 3, str-length($first-val));
+
+  @if ($unit-long == "grad") or
+      ($unit-long == "turn") {
+    $offset: if($unit-long == "grad", -100grad * 3, -0.75turn);
+  }
+
+  @else if ($unit-short == "deg") or
+           ($unit-short == "rad") {
+    $offset: if($unit-short == "deg", -90 * 3, 1.6rad);
+  }
+
+  @if $offset {
+    $num: _str-to-num($first-val);
+
+    @return (
+      webkit-image: -webkit- + $prefix + ($offset - $num) + $suffix,
+      spec-image: $image
+    );
+  }
+}
+
+@function _linear-gradient-parser($image) {
+  $image: unquote($image);
+  $gradients: ();
+  $start: str-index($image, "(");
+  $end: str-index($image, ",");
+  $first-val: str-slice($image, $start + 1, $end - 1);
+
+  $prefix: str-slice($image, 0, $start);
+  $suffix: str-slice($image, $end, str-length($image));
+
+  $has-multiple-vals: str-index($first-val, " ");
+  $has-single-position: unquote(_position-flipper($first-val) + "");
+  $has-angle: _is-num(str-slice($first-val, 0, 0));
+
+  @if $has-multiple-vals {
+    $gradients: _linear-side-corner-parser($image, $first-val, $prefix, $suffix, $has-multiple-vals);
+  }
+
+  @else if $has-single-position != "" {
+    $pos: unquote($has-single-position + "");
+
+    $gradients: (
+      webkit-image: -webkit- + $image,
+      spec-image: $prefix + "to " + $pos + $suffix
+    );
+  }
+
+  @else if $has-angle {
+    // Rotate degree for webkit
+    $gradients: _linear-angle-parser($image, $first-val, $prefix, $suffix);
+  }
+
+  @else {
+    $gradients: (
+      webkit-image: -webkit- + $image,
+      spec-image: $image
+    );
+  }
+
+  @return $gradients;
+}
+
+@function _linear-positions-parser($pos) {
+  $type: type-of(nth($pos, 1));
+  $spec: null;
+  $degree: null;
+  $side: null;
+  $corner: null;
+  $length: length($pos);
+  // Parse Side and corner positions
+  @if ($length > 1) {
+    @if nth($pos, 1) == "to" { // Newer syntax
+      $side: nth($pos, 2);
+
+      @if $length == 2 { // eg. to top
+        // Swap for backwards compatability
+        $degree: _position-flipper(nth($pos, 2));
+      }
+      @else if $length == 3 { // eg. to top left
+        $corner: nth($pos, 3);
+      }
+    }
+    @else if $length == 2 { // Older syntax ("top left")
+      $side: _position-flipper(nth($pos, 1));
+      $corner: _position-flipper(nth($pos, 2));
+    }
+
+    @if ("#{$side} #{$corner}" == "left top") or ("#{$side} #{$corner}" == "top left") {
+      $degree: _position-flipper(#{$side}) _position-flipper(#{$corner});
+    }
+    @else if ("#{$side} #{$corner}" == "right top") or ("#{$side} #{$corner}" == "top right") {
+      $degree: _position-flipper(#{$side}) _position-flipper(#{$corner});
+    }
+    @else if ("#{$side} #{$corner}" == "right bottom") or ("#{$side} #{$corner}" == "bottom right") {
+      $degree: _position-flipper(#{$side}) _position-flipper(#{$corner});
+    }
+    @else if ("#{$side} #{$corner}" == "left bottom") or ("#{$side} #{$corner}" == "bottom left") {
+      $degree: _position-flipper(#{$side}) _position-flipper(#{$corner});
+    }
+    $spec: to $side $corner;
+  }
+  @else if $length == 1 {
+    // Swap for backwards compatability
+    @if $type == string {
+      $degree: $pos;
+      $spec: to _position-flipper($pos);
+    }
+    @else {
+      $degree: -270 - $pos; //rotate the gradient opposite from spec
+      $spec: $pos;
+    }
+  }
+  $degree: unquote($degree + ",");
+  $spec:   unquote($spec + ",");
+  @return $degree $spec;
+}
+
+@function _position-flipper($pos) {
+ @return if($pos == left, right, null)
+         if($pos == right, left, null)
+         if($pos == top, bottom, null)
+         if($pos == bottom, top, null);
+}
+
+// Private function for linear-gradient-parser
+@function _linear-side-corner-parser($image, $first-val, $prefix, $suffix, $has-multiple-vals) {
+  $val-1: str-slice($first-val, 0, $has-multiple-vals - 1 );
+  $val-2: str-slice($first-val, $has-multiple-vals + 1, str-length($first-val));
+  $val-3: null;
+  $has-val-3: str-index($val-2, " ");
+
+  @if $has-val-3 {
+    $val-3: str-slice($val-2, $has-val-3 + 1, str-length($val-2));
+    $val-2: str-slice($val-2, 0, $has-val-3 - 1);
+  }
+
+  $pos: _position-flipper($val-1) _position-flipper($val-2) _position-flipper($val-3);
+  $pos: unquote($pos + "");
+
+  // Use old spec for webkit
+  @if $val-1 == "to" {
+    @return (
+      webkit-image: -webkit- + $prefix + $pos + $suffix,
+      spec-image: $image
+    );
+  }
+
+  // Bring the code up to spec
+  @else {
+    @return (
+      webkit-image: -webkit- + $image,
+      spec-image: $prefix + "to " + $pos + $suffix
+    );
+  }
+}
+
+@function _radial-arg-parser($G1, $G2, $pos, $shape-size) {
+  @each $value in $G1, $G2 {
+    $first-val: nth($value, 1);
+    $pos-type:  type-of($first-val);
+    $spec-at-index: null;
+
+    // Determine if spec was passed to mixin
+    @if type-of($value) == list {
+      $spec-at-index: if(index($value, at), index($value, at), false);
+    }
+    @if $spec-at-index {
+      @if $spec-at-index > 1 {
+        @for $i from 1 through ($spec-at-index - 1) {
+          $shape-size: $shape-size nth($value, $i);
+        }
+        @for $i from ($spec-at-index + 1) through length($value) {
+          $pos: $pos nth($value, $i);
+        }
+      }
+      @else if $spec-at-index == 1 {
+        @for $i from ($spec-at-index + 1) through length($value) {
+          $pos: $pos nth($value, $i);
+        }
+      }
+      $G1: null;
+    }
+
+    // If not spec calculate correct values
+    @else {
+      @if ($pos-type != color) or ($first-val != "transparent") {
+        @if ($pos-type == number)
+        or ($first-val == "center")
+        or ($first-val == "top")
+        or ($first-val == "right")
+        or ($first-val == "bottom")
+        or ($first-val == "left") {
+
+          $pos: $value;
+
+          @if $pos == $G1 {
+            $G1: null;
+          }
+        }
+
+        @else if
+           ($first-val == "ellipse")
+        or ($first-val == "circle")
+        or ($first-val == "closest-side")
+        or ($first-val == "closest-corner")
+        or ($first-val == "farthest-side")
+        or ($first-val == "farthest-corner")
+        or ($first-val == "contain")
+        or ($first-val == "cover") {
+
+          $shape-size: $value;
+
+          @if $value == $G1 {
+            $G1: null;
+          }
+
+          @else if $value == $G2 {
+            $G2: null;
+          }
+        }
+      }
+    }
+  }
+  @return $G1, $G2, $pos, $shape-size;
+}
+
+@function _radial-gradient-parser($image) {
+  $image: unquote($image);
+  $gradients: ();
+  $start: str-index($image, "(");
+  $end: str-index($image, ",");
+  $first-val: str-slice($image, $start + 1, $end - 1);
+
+  $prefix: str-slice($image, 0, $start);
+  $suffix: str-slice($image, $end, str-length($image));
+
+  $is-spec-syntax: str-index($first-val, "at");
+
+  @if $is-spec-syntax and $is-spec-syntax > 1 {
+    $keyword: str-slice($first-val, 1, $is-spec-syntax - 2);
+    $pos: str-slice($first-val, $is-spec-syntax + 3, str-length($first-val));
+    $pos: append($pos, $keyword, comma);
+
+    $gradients: (
+      webkit-image: -webkit- + $prefix + $pos + $suffix,
+      spec-image: $image
+    )
+  }
+
+  @else if $is-spec-syntax == 1 {
+    $pos: str-slice($first-val, $is-spec-syntax + 3, str-length($first-val));
+
+    $gradients: (
+      webkit-image: -webkit- + $prefix + $pos + $suffix,
+      spec-image: $image
+    )
+  }
+
+  @else if str-index($image, "cover") or str-index($image, "contain") {
+    @warn "Radial-gradient needs to be updated to conform to latest spec.";
+
+    $gradients: (
+      webkit-image: null,
+      spec-image: $image
+    )
+  }
+
+  @else {
+    $gradients: (
+      webkit-image: -webkit- + $image,
+      spec-image: $image
+    )
+  }
+
+  @return $gradients;
+}
+
+@function _radial-positions-parser($gradient-pos) {
+  $shape-size: nth($gradient-pos, 1);
+  $pos:        nth($gradient-pos, 2);
+  $shape-size-spec: _shape-size-stripper($shape-size);
+
+  $pre-spec: unquote(if($pos, "#{$pos}, ", null))
+             unquote(if($shape-size, "#{$shape-size},", null));
+  $pos-spec: if($pos, "at #{$pos}", null);
+
+  $spec: "#{$shape-size-spec} #{$pos-spec}";
+
+  // Add comma
+  @if ($spec != '  ') {
+    $spec: "#{$spec},"
+  }
+
+  @return $pre-spec $spec;
+}
+
+// User for linear and radial gradients within background-image or border-image properties
+
+@function _render-gradients($gradient-positions, $gradients, $gradient-type, $vendor: false) {
+  $pre-spec: null;
+  $spec: null;
+  $vendor-gradients: null;
+  @if $gradient-type == linear {
+    @if $gradient-positions {
+      $pre-spec: nth($gradient-positions, 1);
+      $spec:     nth($gradient-positions, 2);
+    }
+  }
+  @else if $gradient-type == radial {
+    $pre-spec: nth($gradient-positions, 1);
+    $spec:     nth($gradient-positions, 2);
+  }
+
+  @if $vendor {
+    $vendor-gradients: -#{$vendor}-#{$gradient-type}-gradient(#{$pre-spec} $gradients);
+  }
+  @else if $vendor == false {
+    $vendor-gradients: "#{$gradient-type}-gradient(#{$spec} #{$gradients})";
+    $vendor-gradients: unquote($vendor-gradients);
+  }
+  @return $vendor-gradients;
+}
+
+@function _shape-size-stripper($shape-size) {
+  $shape-size-spec: null;
+  @each $value in $shape-size {
+    @if ($value == "cover") or ($value == "contain") {
+      $value: null;
+    }
+    $shape-size-spec: "#{$shape-size-spec} #{$value}";
+  }
+  @return $shape-size-spec;
+}
+
+//************************************************************************//
+// Helper function for linear/radial-gradient-parsers.
+// Source: http://sassmeister.com/gist/9647408
+//************************************************************************//
+@function _str-to-num($string) {
+  // Matrices
+  $strings: '0' '1' '2' '3' '4' '5' '6' '7' '8' '9';
+  $numbers:  0   1   2   3   4   5   6   7   8   9;
+
+  // Result
+  $result: 0;
+  $divider: 0;
+  $minus: false;
+
+  // Looping through all characters
+  @for $i from 1 through str-length($string) {
+    $character: str-slice($string, $i, $i);
+    $index: index($strings, $character);
+
+    @if $character == '-' {
+      $minus: true;
+    }
+
+    @else if $character == '.' {
+      $divider: 1;
+    }
+
+    @else {
+      @if not $index {
+        $result: if($minus, $result * -1, $result);
+        @return _convert-units($result, str-slice($string, $i));
+      }
+
+      $number: nth($numbers, $index);
+
+      @if $divider == 0 {
+        $result: $result * 10;
+      }
+
+      @else {
+        // Move the decimal dot to the left
+        $divider: $divider * 10;
+        $number: $number / $divider;
+      }
+
+      $result: $result + $number;
+    }
+  }
+  @return if($minus, $result * -1, $result);
+}
