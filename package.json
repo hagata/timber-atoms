@@ -1,6 +1,6 @@
 {
-  "name": "lumberjack",
-  "version": "0.0.1",
+  "name": "timber_atoms",
+  "version": "0.0.2",
   "description": "shopify theme built from timber",
   "main": "index.js",
   "scripts": {

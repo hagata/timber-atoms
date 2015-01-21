@@ -1,0 +1,29 @@
+
+
+
+
+/* ======================================================================
+
+// Bourbon Neat 1.6.0.pre
+// MIT Licensed
+// Copyright (c) 2012-2013 thoughtbot, inc.
+http://neat.bourbon.io/
+
+========================================================================*/
+
+@function new-breakpoint($query:$feature $value $columns, $total-columns: $grid-columns) {
+
+  @if length($query) == 1 {
+    $query: $default-feature nth($query, 1) $total-columns;
+  }
+
+  @else if length($query) % 2 == 0 {
+    $query: append($query, $total-columns);
+  }
+
+  @if not belongs-to($query, $visual-grid-breakpoints) {
+    $visual-grid-breakpoints: append($visual-grid-breakpoints, $query, comma) !global;
+  }
+
+  @return $query;
+}
